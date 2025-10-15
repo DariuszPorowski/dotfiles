@@ -1,0 +1,16 @@
+# ~/.gh_microsoft.gitconfig
+{{- $config := joinPath .chezmoi.sourceDir "encrypted" "gh_microsoft.yaml.age" | include | decrypt | fromYaml }}
+
+[user]
+  name = {{ $config.name | quote }}
+  email = {{ $config.email | quote }}
+  signingkey = {{ $config.signing_key }}
+
+[credential]
+  namespace = work
+
+[credential "https://github.com"]
+  username = {{ $config.github_username | quote }}
+
+[github]
+  user = {{ $config.github_username | quote }}

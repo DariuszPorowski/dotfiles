@@ -1,0 +1,10 @@
+# ~/.azdo_microsoft.gitconfig
+{{- $config := joinPath .chezmoi.sourceDir "encrypted" "azdo_microsoft.yaml.age" | include | decrypt | fromYaml }}
+
+[user]
+  name = {{ $config.name | quote }}
+  email = {{ $config.email | quote }}
+  signingkey = {{ $config.signing_key }}
+
+[credential]
+  namespace = work

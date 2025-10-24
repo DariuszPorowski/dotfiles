@@ -1,0 +1,13 @@
+# ~/.wslconfig
+
+# Settings apply across all Linux distros running on WSL 2
+[wsl2]
+guiApplications=true
+
+# Turns on output console showing contents of dmesg when opening a WSL 2 distro for debugging
+# debugConsole=true
+
+# Enable experimental features
+[experimental]
+sparseVhd=true
+bestEffortDnsParsing=true

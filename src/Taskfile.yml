@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+# ~/.Taskfile.yml
+#
+# docs: https://taskfile.dev
+#
+# --- Windows ---
+# winget install Task.Task
+#
+# --- Linux ---
+# sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
+# echo 'command -v task >/dev/null || export PATH="$PATH:$HOME/.local/bin"' >> ~/.profile
+# source ~/.profile
+#
+# ---  macOS ---
+# brew install go-task/tap/go-task
+---
+version: "3"
+
+vars:
+  pwsh: pwsh -NonInteractive -NoProfile -NoLogo -Command
+
+tasks:
+  git:clean:
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - cmd: |
+          {{.pwsh}} "git fetch -p; git branch -vv | ?{ $_ -match ': gone]' } | %{ $_.Trim().Split(' ')[0] } | %{ git branch -D $_ }"
+        platforms: [windows]
+      - cmd: |
+          git fetch -p; git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -D
+          # git fetch -p && for branch in `git branch -vv | grep ': gone]' | awk '{print $1}'`; do git branch -D $branch; done
+        platforms: [linux, darwin]

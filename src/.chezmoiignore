@@ -1,0 +1,32 @@
+README.md
+*.age
+
+src/
+src/*
+src/**
+docs/
+docs/*
+docs/**
+encrypted/
+encrypted/*
+encrypted/**
+secrets/
+secrets/*
+secrets/**
+
+{{- if not .machine.windows -}}
+AppData/
+AppData/*
+AppData/**
+.wslconfig
+*.reg
+{{- else }}
+.config/1Password/
+.config/1Password/*
+.config/1Password/**
+.bashrc
+.terraformrc
+.wsl/
+.wsl/*
+.wsl/**
+{{- end -}}

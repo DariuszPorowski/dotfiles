@@ -24,6 +24,10 @@ case $- in
 *) return ;;
 esac
 
+if command -v go &>/dev/null; then
+  export GOBIN="$(go env GOPATH)/bin"
+fi
+
 if command -v aliae &>/dev/null; then
   eval "$(aliae init bash)"
 fi

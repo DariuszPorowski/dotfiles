@@ -15,6 +15,7 @@ secrets/*
 secrets/**
 
 {{- if not .machine.windows -}}
+autorun.cmd
 AppData/
 AppData/*
 AppData/**

@@ -4,11 +4,18 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
-{{ if eq .machine.type "wsl" }}
 dirs=(
+  "$HOME/bin"
+  "$HOME/.local/bin"
+  "$HOME/.cargo/bin"
+)
+
+{{ if eq .machine.type "wsl" }}
+dirs+=(
   "/mnt/c/Windows/System32/OpenSSH"
   "/mnt/c/Program Files/Microsoft VS Code/bin"
 )
+{{- end }}
 
 for dir in "${dirs[@]}"; do
   case ":$PATH:" in
@@ -16,7 +23,6 @@ for dir in "${dirs[@]}"; do
   *) PATH="$PATH:$dir" ;;
   esac
 done
-{{- end }}
 
 # If not running interactively, don't do anything
 case $- in

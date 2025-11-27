@@ -4,15 +4,31 @@ Uses [chezmoi](https://www.chezmoi.io/) as the dotfile manager.
 
 ## AGE key
 
-Set AGE key
+### Install AGE
 
-### 1Password CLI
+[Installation](https://github.com/FiloSottile/age?tab=readme-ov-file#installation)
+
+#### Windows
+
+```powershell
+winget install --id FiloSottile.age
+```
+
+#### Linux
+
+```sh
+sudo apt install age
+```
+
+### Set AGE key
+
+#### 1Password CLI
 
 ```sh
 op read op://personal/age/key > ~/personal.age
 ```
 
-### PowerShell
+#### PowerShell
 
 ```pwsh
 # Prevent saving further history in this session (optional)
@@ -23,7 +39,7 @@ Set-Content -Path $HOME/personal.age -Value $plain -NoNewline
 Remove-Variable plain
 ```
 
-### Bash
+#### Bash
 
 Paste then Ctrl+D (the key itself is never on a command line):
 
@@ -44,16 +60,20 @@ chmod 600 ~/personal.age
 Init with CURL
 
 ```sh
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init DariuszPorowski --apply
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin init DariuszPorowski --apply
 ```
 
 Init with WGET
 
 ```sh
-sh -c "$(wget -qO- get.chezmoi.io)" -- init DariuszPorowski --apply
+sh -c "$(wget -qO- get.chezmoi.io)" -- -b ~/.local/bin init DariuszPorowski --apply
 ```
 
-Some of the scripts require `sudo`.
+Some of the scripts may require `sudo`.
+
+```sh
+sudo -u $USER sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin init DariuszPorowski --apply
+```
 
 ## Windows
 

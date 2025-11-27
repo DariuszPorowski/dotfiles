@@ -1,4 +1,3 @@
-{{ if eq .machine.type "wsl" -}}
 #!/bin/bash
 
 install_package_if_missing() {
@@ -24,5 +23,6 @@ install_package_if_missing() {
   fi
 }
 
+{{ if eq .machine.type "wsl" -}}
 install_package_if_missing "socat"
 {{ end -}}

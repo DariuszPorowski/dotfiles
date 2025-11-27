@@ -1,5 +1,15 @@
 # shellcheck shell=sh
 
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+    uid=$(id -u)
+    dbus-daemon --session --address=unix:path=/run/user/$uid/bus --fork
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus"
+fi
+
+if [ -f "$HOME/.local/bin/ssh-relay.sh" ]; then
+  . "$HOME/.local/bin/ssh-relay.sh"
+fi
+
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
   test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"

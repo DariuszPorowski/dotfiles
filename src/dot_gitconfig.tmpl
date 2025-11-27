@@ -146,3 +146,6 @@
   azureAuthority = https://login.microsoftonline.com/{{ .tenant_id }}
   username = {{ $config.email }}
 {{ end }}
+
+[alias]
+  logp = log --graph --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --date=relative

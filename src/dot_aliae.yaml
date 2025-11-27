@@ -13,7 +13,8 @@ script:
   - if: and (hasCommand "oh-my-posh") (match .Shell "bash" "zsh")
     value: |
       eval "$(oh-my-posh init {{ .Shell }})"
-alias:
-  - name: logp
-    value: log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --date=relative
-    type: git
+
+# alias:
+#   - name: logp
+#     value: log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --date=relative
+#     type: git

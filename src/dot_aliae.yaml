@@ -7,9 +7,9 @@ path:
       {{ .Home }}/.cargo/bin/
       {{ .Home }}/go/bin/
 script:
-  - if: match .Shell "pwsh"
+  - if: and (hasCommand "oh-my-posh.exe") (match .Shell "pwsh")
     value: |
       oh-my-posh init pwsh | Invoke-Expression
-  - if: match .Shell "bash" "zsh"
+  - if: and (hasCommand "oh-my-posh.exe") (match .Shell "bash" "zsh")
     value: |
       eval "$(oh-my-posh init {{ .Shell }})"

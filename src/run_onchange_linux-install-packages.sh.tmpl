@@ -1,4 +1,4 @@
-{{ if .machine.linux }}
+{{- if .machine.linux -}}
 #!/bin/bash
 
 install_package_if_missing() {
@@ -28,4 +28,4 @@ install_package_if_missing() {
 install_package_if_missing "socat"
 {{ end }}
 
-{{ end }}
+{{- end -}}

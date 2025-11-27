@@ -1,4 +1,4 @@
-{{ if .machine.linux }}
+{{- if .machine.linux -}}
 #!/bin/bash
 
 setup_service() {
@@ -19,4 +19,4 @@ setup_service() {
 setup_service "ssh-agent-relay.service"
 {{ end }}
 
-{{ end }}
+{{- end -}}

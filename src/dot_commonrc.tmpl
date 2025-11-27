@@ -6,6 +6,10 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
     export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus"
 fi
 
+if [ -f "$HOME/.local/bin/1p-ssh-agent-relay.sh" ]; then
+  "$HOME/.local/bin/1p-ssh-agent-relay.sh"
+fi
+
 if [ -f "$HOME/.local/bin/ssh-relay.sh" ]; then
   . "$HOME/.local/bin/ssh-relay.sh"
 fi

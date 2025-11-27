@@ -11,5 +11,5 @@ Host *.github.com github.com
 {{- else if .machine.mac }}
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 {{- else if .machine.windows }}
-  IdentityAgent "\\.\pipe\openssh-ssh-agent"
+  # IdentityAgent "\\.\pipe\openssh-ssh-agent"
 {{- end }}

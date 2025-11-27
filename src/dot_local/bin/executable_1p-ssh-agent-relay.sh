@@ -2,12 +2,9 @@
 
 # This script is used to start the npiperelay.exe process which forwards the ssh-agent socket to the Windows side
 
-# Only print messages when script is executed directly (not sourced during shell init)
-# Check if running interactively AND script is the main command (not sourced)
+# Only print messages when running in an interactive terminal
 _log() {
-  if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    echo "$@"
-  fi
+  [[ -t 1 ]] && echo "$@"
 }
 
 # Set the socket location for SSH agent forwarding

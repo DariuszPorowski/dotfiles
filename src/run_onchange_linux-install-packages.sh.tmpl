@@ -28,4 +28,7 @@ install_package_if_missing() {
 install_package_if_missing "socat"
 {{ end }}
 
+curl -fsSL https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+curl -fsSL https://aliae.dev/install.sh | bash -s -- -d ~/.local/bin
+
 {{- end -}}

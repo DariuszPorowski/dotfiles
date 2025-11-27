@@ -1,0 +1,10 @@
+{{ if .machine.windows }}
+$packages = @(
+    "JanDeDobbeleer.OhMyPosh"
+    "JanDeDobbeleer.Aliae"
+)
+
+foreach ($package in $packages) {
+    winget install --id $package --exact --accept-source-agreements --accept-package-agreements --disable-interactivity
+}
+{{ end -}}

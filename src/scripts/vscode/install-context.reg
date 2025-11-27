@@ -3,15 +3,15 @@ Windows Registry Editor Version 5.00
 ; Add "Open with Code" for folders
 [HKEY_CLASSES_ROOT\Directory\Background\shell\Open with &Code]
 @="Open with &Code"
-"Icon"="C:\\Program Files\\Microsoft VS Code\\bin\\code.exe"
+"Icon"="C:\\Program Files\\Microsoft VS Code\\Code.exe"
 
 [HKEY_CLASSES_ROOT\Directory\Background\shell\Open with &Code\command]
-@="\"C:\\Program Files\\Microsoft VS Code\\bin\\code.exe\" \"%V\""
+@="\"C:\\Program Files\\Microsoft VS Code\\Code.exe\" \"%V\""
 
 ; Add "Open with Code" for files
 [HKEY_CLASSES_ROOT\*\shell\Open with &Code]
 @="Open with &Code"
-"Icon"="C:\\Program Files\\Microsoft VS Code\\bin\\code.exe"
+"Icon"="C:\\Program Files\\Microsoft VS Code\\Code.exe"
 
 [HKEY_CLASSES_ROOT\*\shell\Open with &Code\command]
-@="\"C:\\Program Files\\Microsoft VS Code\\bin\\code.exe\" \"%1\""
+@="\"C:\\Program Files\\Microsoft VS Code\\Code.exe\" \"%1\""

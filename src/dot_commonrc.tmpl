@@ -84,7 +84,25 @@ alias l='ls -CF'
 
 # fnm
 FNM_PATH="${HOME}/.local/share/fnm"
-if [[ -d "$FNM_PATH" ]]; then
+if [ -d "$FNM_PATH" ]; then
   export PATH="$FNM_PATH:$PATH"
-  eval "`fnm env`"
+
+  # Detect current shell
+  _current_shell=$(basename "$SHELL")
+  case "$_current_shell" in
+    bash|zsh|fish)
+      eval "$(fnm env --use-on-cd --version-file-strategy=local --shell "$_current_shell")"
+      ;;
+    *)
+      # Fallback: try to detect from process name
+      if [ -n "$BASH_VERSION" ]; then
+        eval "$(fnm env --use-on-cd --version-file-strategy=local --shell bash)"
+      elif [ -n "$ZSH_VERSION" ]; then
+        eval "$(fnm env --use-on-cd --version-file-strategy=local --shell zsh)"
+      elif [ -n "$FISH_VERSION" ]; then
+        eval "$(fnm env --use-on-cd --version-file-strategy=local --shell fish)"
+      fi
+      ;;
+  esac
+  unset _current_shell
 fi

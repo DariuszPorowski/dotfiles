@@ -5,7 +5,7 @@
 guiApplications=true
 
 # https://learn.microsoft.com/en-us/windows/wsl/networking#dns-tunneling
-# dnsTunneling=true
+dnsTunneling=true
 
 # https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking
 # networkingMode=mirrored

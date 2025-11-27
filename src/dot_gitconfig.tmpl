@@ -71,13 +71,10 @@
 [gpg.ssh]
 {{- if .machine.windows }}
   # Windows-specific settings
-  # program = "C:/Users/{{- .username -}}/AppData/Local/1Password/app/8/op-ssh-sign.exe"
   program = "C:/Users/{{- .username -}}/AppData/Local/Microsoft/WindowsApps/op-ssh-sign.exe"
 {{- else if eq .machine.type "wsl" }}
   # WSL-specific settings
-  # program = "/mnt/c/Users/{{- .username -}}/AppData/Local/1Password/app/8/op-ssh-sign-wsl"
   program = "/mnt/c/Users/{{- .username -}}/AppData/Local/Microsoft/WindowsApps/op-ssh-sign.exe"
-
 {{- end }}
 {{- end }}
 

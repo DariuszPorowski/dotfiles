@@ -15,6 +15,7 @@ dirs=(
 dirs+=(
   "/mnt/c/Windows/System32/OpenSSH"
   "/mnt/c/Program Files/Microsoft VS Code/bin"
+  "/mnt/c/Users/$(whoami)/AppData/Local/Programs/Microsoft VS Code/bin"
 )
 {{- end }}
 
@@ -152,4 +153,13 @@ if ! shopt -oq posix; then
   elif [[ -f /etc/bash_completion ]]; then
     . /etc/bash_completion
   fi
+fi
+
+# Source all configuration files from ~/.bashrc.d
+# This helps keep configurations modular and organized.
+# Each configuration should be in a separate file inside ~/.bashrc.d
+if [ -d "$HOME/.bashrc.d" ]; then
+  for rcfile in "$HOME/.bashrc.d"/*; do
+    [ -f "$rcfile" ] && source "$rcfile"
+  done
 fi

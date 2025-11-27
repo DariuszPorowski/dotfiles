@@ -1,7 +1,15 @@
 Host *.github.com github.com
   ForwardAgent yes
-{{- if .machine.linux }}
+{{- if and .machine.linux (not (eq .machine.type "wsl")) }}
   IdentityAgent ~/.1password/agent.sock
+{{- else if eq .machine.type "wsl" }}
+  # WSL uses Windows 1Password via npiperelay or socat
+  # Install npiperelay and socat, then configure
+  # https://github.com/ran-dall/WSL/tree/main/Scripts/Deploy-1PasswordSSHAgentRelay
+  # IdentityAgent "~/.ssh/agent.sock"
+  IdentityAgent $SSH_AUTH_SOCK
 {{- else if .machine.mac }}
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+{{- else if .machine.windows }}
+  IdentityAgent "\\.\pipe\openssh-ssh-agent"
 {{- end }}

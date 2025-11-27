@@ -14,6 +14,14 @@ secrets/
 secrets/*
 secrets/**
 
+{{- if ne .machine.type "wsl" -}}
+.local/bin/1p-ssh-agent-relay.sh
+.local/bin/ssh-relay.sh
+.config/systemd/
+.config/systemd/user/
+.config/systemd/user/ssh-agent-relay.service
+{{- end -}}
+
 {{- if not .machine.windows -}}
 autorun.cmd
 AppData/
@@ -26,6 +34,9 @@ AppData/**
 .config/1Password/*
 .config/1Password/**
 .bashrc
+.zshrc
+.zprofile
+.profile
 .terraformrc
 .wsl/
 .wsl/*

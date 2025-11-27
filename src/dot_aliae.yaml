@@ -1,11 +1,12 @@
 # yaml-language-server: $schema=https://aliae.dev/schema.json
 ---
-path:
-  - value: |
-      {{ .Home }}/bin/
-      {{ .Home }}/.local/bin/
-      {{ .Home }}/.cargo/bin/
-      {{ .Home }}/go/bin/
+# path:
+#   - value: |
+#       {{ .Home }}/bin/
+#       {{ .Home }}/local/bin/
+#       {{ .Home }}/.local/bin/
+#       {{ .Home }}/.cargo/bin/
+#       {{ .Home }}/go/bin/
 script:
   - if: and (hasCommand "oh-my-posh.exe") (match .Shell "pwsh")
     value: |

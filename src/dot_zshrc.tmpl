@@ -23,6 +23,11 @@ printf '%s\n' "$PATH_DIRS" | while IFS= read -r dir; do
   esac
 done
 
+if [ -f ~/.commonrc ]; then
+  . ~/.commonrc
+fi
+
+
 # Source all configuration files from ~/.zshrc.d
 # This helps keep configurations modular and organized.
 # Each configuration should be in a separate file inside ~/.zshrc.d

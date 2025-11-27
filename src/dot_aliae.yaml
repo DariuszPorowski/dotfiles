@@ -17,9 +17,3 @@ alias:
   - name: logp
     value: log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --date=relative
     type: git
-  - name: hello-world
-    value: echo "hello world"
-    type: function
-  - name: sync
-    value: "!git fetch origin"
-    type: git

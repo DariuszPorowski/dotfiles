@@ -4,40 +4,14 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
-dirs=(
-  "$HOME/bin"
-  "$HOME/local/bin"
-  "$HOME/.local/bin"
-  "$HOME/.cargo/bin"
-)
-
-{{ if eq .machine.type "wsl" }}
-dirs+=(
-  "/mnt/c/Windows/System32/OpenSSH"
-  "/mnt/c/Program Files/Microsoft VS Code/bin"
-  "/mnt/c/Users/$(whoami)/AppData/Local/Programs/Microsoft VS Code/bin"
-)
-{{- end }}
-
-for dir in "${dirs[@]}"; do
-  case ":$PATH:" in
-  *":$dir:"*) ;;
-  *) PATH="$PATH:$dir" ;;
-  esac
-done
-
 # If not running interactively, don't do anything
 case $- in
 *i*) ;;
 *) return ;;
 esac
 
-if command -v go &>/dev/null; then
-  export GOBIN="$(go env GOPATH)/bin"
-fi
-
-if command -v aliae &>/dev/null; then
-  eval "$(aliae init bash)"
+if [[ -f ~/.commonrc ]]; then
+  . ~/.commonrc
 fi
 
 # don't put duplicate lines or lines starting with space in the history.
@@ -118,17 +92,6 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 if [[ -f ~/.bash_aliases ]]; then
   . ~/.bash_aliases
-fi
-
-if [[ -f ~/.commonrc ]]; then
-  . ~/.commonrc
-fi
-
-# fnm
-FNM_PATH="${HOME}/.local/share/fnm"
-if [[ -d "$FNM_PATH" ]]; then
-  export PATH="$FNM_PATH:$PATH"
-  eval "`fnm env`"
 fi
 
 # enable programmable completion features (you don't need to enable

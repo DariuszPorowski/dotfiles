@@ -6,12 +6,60 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
     export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus"
 fi
 
+PATH_DIRS=$(
+  cat <<'EOF'
+"$HOME/bin"
+"$HOME/local/bin"
+"$HOME/.local/bin"
+"$HOME/.cargo/bin"
+EOF
+)
+{{ if eq .machine.type "wsl" }}
+PATH_DIRS="$PATH_DIRS
+/mnt/c/Windows/System32/OpenSSH
+/mnt/c/Program Files/Microsoft VS Code/bin
+/mnt/c/Users/$(whoami)/AppData/Local/Programs/Microsoft VS Code/bin"
+{{- end }}
+
+printf '%s\n' "$PATH_DIRS" | while IFS= read -r dir; do
+  [ -z "$dir" ] && continue
+  case ":$PATH:" in
+  *":$dir:"*) ;;
+  *) PATH="$PATH:$dir" ;;
+  esac
+done
+
+if command -v go &>/dev/null; then
+  export GOBIN="$(go env GOPATH)/bin"
+fi
+
 if [ -f "$HOME/.local/bin/1p-ssh-agent-relay.sh" ]; then
   "$HOME/.local/bin/1p-ssh-agent-relay.sh"
 fi
 
 if [ -f "$HOME/.local/bin/ssh-relay.sh" ]; then
   . "$HOME/.local/bin/ssh-relay.sh"
+fi
+
+if command -v aliae >/dev/null 2>&1; then
+  # Detect current shell
+  _current_shell=$(basename "$SHELL")
+  case "$_current_shell" in
+    bash|zsh|fish)
+      eval "$(aliae init "$_current_shell")"
+      ;;
+    *)
+      # Fallback: try to detect from process name
+      if [ -n "$BASH_VERSION" ]; then
+        eval "$(aliae init bash)"
+      elif [ -n "$ZSH_VERSION" ]; then
+        eval "$(aliae init zsh)"
+      elif [ -n "$FISH_VERSION" ]; then
+        eval "$(aliae init fish)"
+      fi
+      ;;
+  esac
+  unset _current_shell
 fi
 
 # enable color support of ls and also add handy aliases
@@ -30,3 +78,10 @@ fi
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
+
+# fnm
+FNM_PATH="${HOME}/.local/share/fnm"
+if [[ -d "$FNM_PATH" ]]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "`fnm env`"
+fi

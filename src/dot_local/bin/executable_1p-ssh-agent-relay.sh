@@ -2,6 +2,14 @@
 
 # This script is used to start the npiperelay.exe process which forwards the ssh-agent socket to the Windows side
 
+# Only print messages when script is executed directly (not sourced during shell init)
+# Check if running interactively AND script is the main command (not sourced)
+_log() {
+  if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "$@"
+  fi
+}
+
 # Set the socket location for SSH agent forwarding
 export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
 
@@ -19,9 +27,9 @@ if ! pgrep --full --exact --uid="${UID}" "${piperelay[*]}" >/dev/null; then
   # Remove existing socket if it exists
   rm -f "$SSH_AUTH_SOCK"
 
-  echo "Starting SSH-Agent relay..."
+  _log "Starting SSH-Agent relay..."
   # Start the SSH-Agent relay in the background with a new session
   setsid "${piperelay[@]}" >/dev/null 2>&1 &
 else
-  echo "SSH-Agent relay is already running."
+  _log "SSH-Agent relay is already running."
 fi

@@ -1,5 +1,27 @@
 # shellcheck shell=sh
 
+# Helper function to detect current shell
+_detect_shell() {
+  _shell=$(basename "$SHELL")
+  case "$_shell" in
+    bash|zsh|fish)
+      echo "$_shell"
+      ;;
+    *)
+      # Fallback: detect from version variables
+      if [ -n "$BASH_VERSION" ]; then
+        echo "bash"
+      elif [ -n "$ZSH_VERSION" ]; then
+        echo "zsh"
+      elif [ -n "$FISH_VERSION" ]; then
+        echo "fish"
+      else
+        echo "sh"
+      fi
+      ;;
+  esac
+}
+
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
     uid=$(id -u)
     dbus-daemon --session --address=unix:path=/run/user/$uid/bus --fork
@@ -45,24 +67,7 @@ if [ -f "$HOME/.local/bin/ssh-relay.sh" ]; then
 fi
 
 if command -v aliae >/dev/null 2>&1; then
-  # Detect current shell
-  _current_shell=$(basename "$SHELL")
-  case "$_current_shell" in
-    bash|zsh|fish)
-      eval "$(aliae init "$_current_shell")"
-      ;;
-    *)
-      # Fallback: try to detect from process name
-      if [ -n "$BASH_VERSION" ]; then
-        eval "$(aliae init bash)"
-      elif [ -n "$ZSH_VERSION" ]; then
-        eval "$(aliae init zsh)"
-      elif [ -n "$FISH_VERSION" ]; then
-        eval "$(aliae init fish)"
-      fi
-      ;;
-  esac
-  unset _current_shell
+  eval "$(aliae init "$(_detect_shell)")"
 fi
 
 # enable color support of ls and also add handy aliases
@@ -86,23 +91,5 @@ alias l='ls -CF'
 FNM_PATH="${HOME}/.local/share/fnm"
 if [ -d "$FNM_PATH" ]; then
   export PATH="$FNM_PATH:$PATH"
-
-  # Detect current shell
-  _current_shell=$(basename "$SHELL")
-  case "$_current_shell" in
-    bash|zsh|fish)
-      eval "$(fnm env --use-on-cd --version-file-strategy=local --shell "$_current_shell")"
-      ;;
-    *)
-      # Fallback: try to detect from process name
-      if [ -n "$BASH_VERSION" ]; then
-        eval "$(fnm env --use-on-cd --version-file-strategy=local --shell bash)"
-      elif [ -n "$ZSH_VERSION" ]; then
-        eval "$(fnm env --use-on-cd --version-file-strategy=local --shell zsh)"
-      elif [ -n "$FISH_VERSION" ]; then
-        eval "$(fnm env --use-on-cd --version-file-strategy=local --shell fish)"
-      fi
-      ;;
-  esac
-  unset _current_shell
+  eval "$(fnm env --use-on-cd --version-file-strategy=local --shell "$(_detect_shell)")"
 fi

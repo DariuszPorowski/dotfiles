@@ -23,6 +23,10 @@ printf '%s\n' "$PATH_DIRS" | while IFS= read -r dir; do
   esac
 done
 
+HISTSIZE=1000
+HISTFILESIZE=2000
+HISTFILE=~/.zsh_history
+
 if [ -f ~/.commonrc ]; then
   . ~/.commonrc
 fi

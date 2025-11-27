@@ -1,4 +1,4 @@
-{{ if eq .chezmoi.os "windows" -}}
+{{ if .machine.windows }}
 # Set the registry key for running autorun.cmd automatically
 if (-not (Test-Path "HKCU:\Software\Microsoft\Command Processor")) {
     New-Item -Path "HKCU:\Software\Microsoft\Command Processor" -ItemType Directory

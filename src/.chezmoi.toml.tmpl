@@ -1,14 +1,18 @@
 # ~/.config/chezmoi/config.toml
 
-{{/* # GitHub Codespaces clone the repository to a this directory */}}
-{{- if (env "CODESPACES") -}}
+{{/* GitHub Codespaces clone the repository to this directory */}}
+{{- if (env "CODESPACES") }}
 sourceDir = "/workspaces/.codespaces/.persistedshare/dotfiles"
 {{- end }}
 
+{{/* Ephemeral check - must be inline here since machine.toml.tmpl is included after */}}
+{{- $is_ephemeral := or (env "CODESPACES" | not | not) (env "REMOTE_CONTAINERS" | not | not) (env "CI" | not | not) (eq .chezmoi.username "vscode") -}}
+{{- if not $is_ephemeral }}
 encryption = "age"
 [age]
   identity = "~/personal.age"
   recipient = "age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p"
+{{- end }}
 
 progress = true
 verbose = true
@@ -17,7 +21,6 @@ verbose = true
 {{- includeTemplate "machine.toml.tmpl" . }}
 
 [data]
-  ci = {{ env "CI" | not | not }}
   username = {{ .chezmoi.username | splitList `\` | last | quote }}
 
 [data.github]

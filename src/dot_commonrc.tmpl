@@ -22,7 +22,7 @@ _detect_shell() {
   esac
 }
 
-if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && command -v dbus-daemon >/dev/null 2>&1; then
     uid=$(id -u)
     dbus-daemon --session --address=unix:path=/run/user/$uid/bus --fork
     export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus"
@@ -36,7 +36,7 @@ PATH_DIRS=$(
 "$HOME/.cargo/bin"
 EOF
 )
-{{ if eq .machine.type "wsl" }}
+{{- if .machine.wsl }}
 CMD_EXE="/mnt/c/Windows/System32/cmd.exe"
 windowsUsername="$($CMD_EXE /c "echo %username%" | tr -d '\r')"
 

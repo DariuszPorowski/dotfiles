@@ -14,31 +14,38 @@ secrets/
 secrets/*
 secrets/**
 
-{{- if ne .machine.type "wsl" -}}
+{{- if not .machine.wsl }}
 .local/bin/1p-ssh-agent-relay.sh
 .local/bin/ssh-relay.sh
+.local/bin/npiperelay-symlink.sh
 .config/systemd/
-.config/systemd/user/
-.config/systemd/user/ssh-agent-relay.service
-{{- end -}}
+.config/systemd/**
+{{- end }}
 
-{{- if not .machine.windows -}}
+{{- if .machine.ephemeral }}
+# Ephemeral environments (Codespaces/Dev Containers): skip files requiring encryption or local 1Password
+.gh_personal.gitconfig
+.gh_microsoft.gitconfig
+.azdo_microsoft.gitconfig
+.terraformrc
+AppData/**
+.config/1Password/**
+.wsl/**
+.wslconfig
 autorun.cmd
-AppData/
-AppData/*
+*.reg
+{{- else if not .machine.windows }}
+autorun.cmd
 AppData/**
 .wslconfig
 *.reg
 {{- else }}
-.config/1Password/
-.config/1Password/*
+# Windows: skip Linux-specific files
 .config/1Password/**
 .bashrc
 .zshrc
 .zprofile
 .profile
 .terraformrc
-.wsl/
-.wsl/*
 .wsl/**
 {{- end -}}

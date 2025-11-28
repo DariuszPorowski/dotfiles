@@ -3,7 +3,7 @@ provider_installation {
   dev_overrides {
     "microsoft/fabric" = "X:\\gh_personal\\microsoft\\terraform-provider-fabric\\bin\\windows-amd64"
   }
-{{- else if eq .machine.type "wsl" }}
+{{- else if .machine.wsl }}
   dev_overrides {
     "microsoft/fabric" = "/mnt/x/gh_personal/microsoft/terraform-provider-fabric/bin/linux-amd64"
   }

@@ -1,8 +1,8 @@
 Host *.github.com github.com
   ForwardAgent yes
-{{- if and .machine.linux (not (eq .machine.type "wsl")) }}
+{{- if and .machine.linux (not .machine.wsl) }}
   IdentityAgent ~/.1password/agent.sock
-{{- else if eq .machine.type "wsl" }}
+{{- else if .machine.wsl }}
   # WSL uses Windows 1Password via npiperelay and socat
   # Install npiperelay and socat, then configure
   # https://github.com/ran-dall/WSL/tree/main/Scripts/Deploy-1PasswordSSHAgentRelay

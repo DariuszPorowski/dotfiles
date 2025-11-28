@@ -14,9 +14,9 @@ setup_service() {
   fi
 }
 
-{{ if eq .machine.type "wsl" }}
+{{- if .machine.wsl }}
 ~/.local/bin/npiperelay-symlink.sh
 setup_service "ssh-agent-relay.service"
-{{ end }}
+{{- end }}
 
 {{- end -}}

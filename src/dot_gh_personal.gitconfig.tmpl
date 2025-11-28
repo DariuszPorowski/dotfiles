@@ -2,12 +2,12 @@
 
 {{- if .machine.ephemeral }}
 # Ephemeral environment: use environment-provided identity
-[user]
-  name = {{ env "GITHUB_USER" | default .github.username | quote }}
-  email = {{ env "GITHUB_USER" | default .github.username }}@users.noreply.github.com
+# [user]
+#   name = {{ env "GITHUB_USER" | default .github.username | quote }}
+#   email = {{ env "GITHUB_USER" | default .github.username }}@users.noreply.github.com
 
-[credential "https://github.com"]
-  username = {{ env "GITHUB_USER" | default .github.username | quote }}
+# [credential "https://github.com"]
+#   username = {{ env "GITHUB_USER" | default .github.username | quote }}
 
 [github]
   user = {{ env "GITHUB_USER" | default .github.username | quote }}

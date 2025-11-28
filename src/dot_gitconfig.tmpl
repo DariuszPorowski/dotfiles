@@ -27,11 +27,8 @@
 [color]
   ui = auto
 
-{{- if not .machine.ephemeral }}
-
 [commit]
   gpgSign = true
-{{- end }}
 
 [core]
   autoCrlf = input
@@ -80,14 +77,13 @@
 {{- end }}
 {{- end }}
 
-[credential]
 {{- if not .machine.ephemeral }}
+[credential]
   azreposCredentialType = oauth
   bitbucketAuthModes = oauth
   gitHubAuthModes = oauth
   gitLabAuthModes = browser
   msauthUseBroker = true
-{{- end }}
   helper =
 {{- if .machine.windows }}
   helper = manager
@@ -95,8 +91,6 @@
   # WSL-specific settings
   helper = "/mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe"
 {{- end }}
-
-{{- if not .machine.ephemeral }}
 
 [credential "https://dev.azure.com"]
   useHttpPath = true

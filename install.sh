@@ -20,15 +20,15 @@ if ! chezmoi="$(command -v chezmoi)"; then
   unset chezmoi_install_script bin_dir
 fi
 
-# if ! command -v oh-my-posh >/dev/null 2>&1; then
-#   echo "Installing oh-my-posh" >&2
-#   curl -fsSL https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
-# fi
+if ! command -v oh-my-posh >/dev/null 2>&1; then
+  echo "Installing oh-my-posh" >&2
+  curl -fsSL https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+fi
 
-# if ! command -v aliae >/dev/null 2>&1; then
-#   echo "Installing aliae" >&2
-#   curl -fsSL https://aliae.dev/install.sh | bash -s -- -d ~/.local/bin
-# fi
+if ! command -v aliae >/dev/null 2>&1; then
+  echo "Installing aliae" >&2
+  curl -fsSL https://aliae.dev/install.sh | bash -s -- -d ~/.local/bin
+fi
 
 # POSIX way to get script's dir: https://stackoverflow.com/a/29834779/12156188
 script_dir="$(cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P)"

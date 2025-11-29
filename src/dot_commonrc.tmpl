@@ -55,9 +55,7 @@ if [ -f "$HOME/.local/bin/ssh-relay.sh" ]; then
   . "$HOME/.local/bin/ssh-relay.sh"
 fi
 
-if [ -x "$HOME/.local/bin/aliae" ]; then
-  eval "$("$HOME/.local/bin/aliae" init "$(_detect_shell)")"
-elif command -v aliae >/dev/null 2>&1; then
+if command -v aliae >/dev/null 2>&1; then
   eval "$(aliae init "$(_detect_shell)")"
 fi
 

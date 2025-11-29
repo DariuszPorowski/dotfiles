@@ -1,9 +1,5 @@
 # shellcheck shell=sh
 
-if [ -f ~/.commonrc ]; then
-  . ~/.commonrc
-fi
-
 HISTSIZE=1000
 HISTFILESIZE=2000
 HISTFILE=~/.zsh_history
@@ -16,4 +12,8 @@ if [ -d "$HOME/.zshrc.d" ]; then
   for rcfile in "$HOME/.zshrc.d"/*; do
     [ -f "$rcfile" ] && . "$rcfile"
   done
+fi
+
+if [ -f ~/.commonrc ]; then
+  . ~/.commonrc
 fi

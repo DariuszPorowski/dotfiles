@@ -2,24 +2,15 @@
 
 # Helper function to detect current shell
 _detect_shell() {
-  _shell=$(basename "$SHELL")
-  case "$_shell" in
-    bash|zsh|fish)
-      echo "$_shell"
-      ;;
-    *)
-      # Fallback: detect from version variables
-      if [ -n "$BASH_VERSION" ]; then
-        echo "bash"
-      elif [ -n "$ZSH_VERSION" ]; then
-        echo "zsh"
-      elif [ -n "$FISH_VERSION" ]; then
-        echo "fish"
-      else
-        echo "sh"
-      fi
-      ;;
-  esac
+  if [ -n "$BASH_VERSION" ]; then
+    echo "bash"
+  elif [ -n "$ZSH_VERSION" ]; then
+    echo "zsh"
+  elif [ -n "$FISH_VERSION" ]; then
+    echo "fish"
+  else
+    basename "${SHELL:-sh}"
+  fi
 }
 
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && command -v dbus-daemon >/dev/null 2>&1; then
@@ -64,7 +55,9 @@ if [ -f "$HOME/.local/bin/ssh-relay.sh" ]; then
   . "$HOME/.local/bin/ssh-relay.sh"
 fi
 
-if command -v aliae >/dev/null 2>&1; then
+if [ -x "$HOME/.local/bin/aliae" ]; then
+  eval "$("$HOME/.local/bin/aliae" init "$(_detect_shell)")"
+elif command -v aliae >/dev/null 2>&1; then
   eval "$(aliae init "$(_detect_shell)")"
 fi
 

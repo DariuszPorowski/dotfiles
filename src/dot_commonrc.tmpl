@@ -28,32 +28,28 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && command -v dbus-daemon >/dev/null 2>&1;
     export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus"
 fi
 
-PATH_DIRS="
-$HOME/bin
-$HOME/local/bin
-$HOME/.local/bin
-$HOME/.cargo/bin
-"
 {{- if .machine.wsl }}
 CMD_EXE="/mnt/c/Windows/System32/cmd.exe"
 windowsUsername="$($CMD_EXE /c "echo %username%" | tr -d '\r')"
-
-PATH_DIRS="$PATH_DIRS
-/mnt/c/Windows/System32/OpenSSH
-/mnt/c/Program Files/Microsoft VS Code/bin
-/mnt/c/Users/$windowsUsername/AppData/Local/Programs/Microsoft VS Code/bin"
 {{- end }}
 
 # Add directories to PATH
-while IFS= read -r dir; do
-  [ -z "$dir" ] && continue
+for dir in \
+  "$HOME/bin" \
+  "$HOME/local/bin" \
+  "$HOME/.local/bin" \
+  "$HOME/.cargo/bin" \
+{{- if .machine.wsl }}
+  "/mnt/c/Windows/System32/OpenSSH" \
+  "/mnt/c/Program Files/Microsoft VS Code/bin" \
+  "/mnt/c/Users/$windowsUsername/AppData/Local/Programs/Microsoft VS Code/bin" \
+{{- end }}
+; do
   case ":$PATH:" in
   *":$dir:"*) ;;
   *) [ -d "$dir" ] && PATH="$PATH:$dir" ;;
   esac
-done <<EOF
-$PATH_DIRS
-EOF
+done
 export PATH
 
 if command -v go &>/dev/null; then

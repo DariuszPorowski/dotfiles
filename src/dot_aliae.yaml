@@ -7,12 +7,6 @@ path:
       {{ .Home }}/local/bin/
       {{ .Home }}/.local/bin/
       {{ .Home }}/.cargo/bin/
-{{- if .machine.wsl }}
-  - value: |
-      /mnt/c/Windows/System32/OpenSSH
-      /mnt/c/Program Files/Microsoft VS Code/bin
-      /mnt/c/Users/$windowsUsername/AppData/Local/Programs/Microsoft VS Code/bin
-{{- end }}
 script:
   - if: and (hasCommand "oh-my-posh.exe") (match .Shell "pwsh")
     value: |

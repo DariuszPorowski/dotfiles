@@ -113,7 +113,7 @@ fi
 if [[ -f ~/.commonrc ]]; then
   . ~/.commonrc
 fi
-
+{{/*
 {{- if .machine.codespace }}
 # bash theme - partly inspired by https://github.com/ohmyzsh/ohmyzsh/blob/master/themes/robbyrussell.zsh-theme
 __bash_prompt() {
@@ -159,4 +159,4 @@ if [[ "$TERM" == "xterm" ]]; then
   # Append to PROMPT_COMMAND to call precmd before displaying the prompt
   PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND; }precmd"
 fi
-{{- end }}
+{{- end }} */}}

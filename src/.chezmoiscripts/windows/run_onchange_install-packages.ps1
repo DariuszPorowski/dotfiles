@@ -2,6 +2,10 @@
 $packages = @(
     "JanDeDobbeleer.OhMyPosh"
     "JanDeDobbeleer.Aliae"
+    "eza-community.eza"
+    "BurntSushi.ripgrep.MSVC"
+    "sharkdp.bat"
+    "sxyazi.yazi"
 )
 
 foreach ($package in $packages) {

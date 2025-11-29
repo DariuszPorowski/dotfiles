@@ -46,13 +46,18 @@ PATH_DIRS="$PATH_DIRS
 /mnt/c/Users/$windowsUsername/AppData/Local/Programs/Microsoft VS Code/bin"
 {{- end }}
 
-printf '%s\n' "$PATH_DIRS" | while IFS= read -r dir; do
+# Add directories to PATH (using here-string to avoid subshell)
+while IFS= read -r dir; do
   [ -z "$dir" ] && continue
+  eval dir="$dir"  # Expand variables like $HOME
   case ":$PATH:" in
   *":$dir:"*) ;;
   *) PATH="$PATH:$dir" ;;
   esac
-done
+done <<EOF
+$PATH_DIRS
+EOF
+export PATH
 
 if command -v go &>/dev/null; then
   export GOBIN="$(go env GOPATH)/bin"

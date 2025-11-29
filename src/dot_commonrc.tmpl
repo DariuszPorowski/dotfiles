@@ -28,14 +28,12 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && command -v dbus-daemon >/dev/null 2>&1;
     export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus"
 fi
 
-PATH_DIRS=$(
-  cat <<'EOF'
-"$HOME/bin"
-"$HOME/local/bin"
-"$HOME/.local/bin"
-"$HOME/.cargo/bin"
-EOF
-)
+PATH_DIRS="
+$HOME/bin
+$HOME/local/bin
+$HOME/.local/bin
+$HOME/.cargo/bin
+"
 {{- if .machine.wsl }}
 CMD_EXE="/mnt/c/Windows/System32/cmd.exe"
 windowsUsername="$($CMD_EXE /c "echo %username%" | tr -d '\r')"
@@ -46,13 +44,12 @@ PATH_DIRS="$PATH_DIRS
 /mnt/c/Users/$windowsUsername/AppData/Local/Programs/Microsoft VS Code/bin"
 {{- end }}
 
-# Add directories to PATH (using here-string to avoid subshell)
+# Add directories to PATH
 while IFS= read -r dir; do
   [ -z "$dir" ] && continue
-  eval dir="$dir"  # Expand variables like $HOME
   case ":$PATH:" in
   *":$dir:"*) ;;
-  *) PATH="$PATH:$dir" ;;
+  *) [ -d "$dir" ] && PATH="$PATH:$dir" ;;
   esac
 done <<EOF
 $PATH_DIRS

@@ -10,6 +10,9 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
   Exit
 }
 
+Install-PackageProvider -Name NuGet -Force
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+
 Import-Module PowerShellGet
 
 Write-Host 'INSTALLING PSGALLERY MODULES...'

@@ -1,8 +1,12 @@
 # shellcheck shell=sh
 
-HISTSIZE=1000
-HISTFILESIZE=2000
 HISTFILE=~/.zsh_history
+HISTSIZE=1000
+SAVEHIST=2000
+setopt APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
 
 # Source all configuration files from ~/.zshrc.d
 # This helps keep configurations modular and organized.

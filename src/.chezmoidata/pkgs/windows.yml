@@ -1,0 +1,24 @@
+pkgs:
+  windows:
+    winget:
+      machine:
+        - Git.Git
+        - Git.GCM
+        - JanDeDobbeleer.Aliae
+        - eza-community.eza
+        - BurntSushi.ripgrep.MSVC
+        - sharkdp.bat
+        - GNU.Nano
+        - Neovim.Neovim
+      user:
+        - JanDeDobbeleer.OhMyPosh
+    choco: []
+    scoop: []
+    psGallery:
+      - Microsoft.WinGet.Client
+      - Microsoft.WinGet.DSC
+      - Microsoft.WinGet.Configuration
+      - Microsoft.WinGet.CommandNotFound
+      - Terminal-Icons
+      - PSReadLine
+      - PSScriptAnalyzer

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eufo pipefail
 
 # This command executes upon wsl startup. It must be configured in the /etc/wsl.conf file on the distribution, like this:
 #

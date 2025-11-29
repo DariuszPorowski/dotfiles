@@ -30,15 +30,15 @@ secrets/**
 .terraformrc
 AppData/**
 .config/1Password/**
-{{- end -}}
+{{- end }}
 
 {{ if ne .chezmoi.os "darwin" }}
 .chezmoiscripts/darwin/**
-{{ end }}
+{{- end }}
 
 {{ if ne .chezmoi.os "linux" }}
 .chezmoiscripts/linux/**
-{{ end }}
+{{- end }}
 
 {{ if ne .chezmoi.os "windows" }}
 .chezmoiscripts/windows/**
@@ -47,7 +47,7 @@ Documents/**
 .wsl/**
 autorun.cmd
 .wslconfig
-{{ end }}
+{{- end }}
 
 {{ if eq .chezmoi.os "windows" }}
 .local/**
@@ -58,4 +58,4 @@ autorun.cmd
 .commonrc
 .dircolors
 .terraformrc
-{{ end }}
+{{- end }}

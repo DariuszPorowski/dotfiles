@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eufo pipefail
 
 CMD_EXE="/mnt/c/Windows/System32/cmd.exe"
 windowsUsername="$($CMD_EXE /c "echo %username%" | tr -d '\r')"

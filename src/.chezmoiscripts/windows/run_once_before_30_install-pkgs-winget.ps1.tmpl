@@ -1,0 +1,30 @@
+{{- if .pkgs.windows.winget -}}
+
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+
+if (-not (Get-Command "winget" -ErrorAction SilentlyContinue)) {
+    Write-Error "WinGet hasn't been installed!"
+    exit
+}
+
+# Self-elevate the script if required
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    $currentProcess = Get-Process -Id $PID
+    $argumentList = "-File `"$($MyInvocation.MyCommand.Path)`" $($MyInvocation.UnboundArguments)"
+    Start-Process -FilePath $currentProcess.Path -Verb RunAs -ArgumentList $argumentList -Wait
+    Exit
+}
+
+Write-Host "INSTALLING WINGET PACKAGES..."
+
+{{ range $pkg := .pkgs.windows.winget.machine }}
+Write-Host "Installing machine-scope package: {{ $pkg }}"
+winget install --id '{{ $pkg }}' --exact --accept-source-agreements --accept-package-agreements --disable-interactivity --scope machine
+{{- end }}
+
+{{ range $pkg := .pkgs.windows.winget.user }}
+Write-Host "Installing user-scope package: {{ $pkg }}"
+winget install --id '{{ $pkg }}' --exact --accept-source-agreements --accept-package-agreements --disable-interactivity --scope user
+{{- end }}
+
+{{- end }}

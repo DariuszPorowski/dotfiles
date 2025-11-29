@@ -1,11 +1,10 @@
 {{- $machineType := "desktop" -}}
 {{- $is_codespace := env "CODESPACES" | not | not -}}
 {{- $is_dev_container := env "REMOTE_CONTAINERS" | not | not -}}
-{{- $is_ci := env "CI" | not | not -}}
+{{- $is_ci := or (env "CI" | not | not) (env "GITHUB_ACTIONS" | not | not) -}}
 {{- $is_wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 {{- $is_vscode_user := eq .chezmoi.username "vscode" -}}
-{{- $is_ephemeral := or $is_codespace $is_dev_container $is_ci $is_vscode_user -}}
-{{- $is_headless := $is_ephemeral -}}
+{{- $is_ephemeral := or $is_codespace $is_dev_container $is_ci -}}
 
 {{- if eq .chezmoi.os "darwin" }}
 {{-   if contains "MacBook" (output "/usr/sbin/system_profiler" "SPHardwareDataType") }}
@@ -28,14 +27,13 @@
 {{- end }}
 
 [data.machine]
-  type = {{ $machineType | quote }}
   os = {{ .chezmoi.os | quote }}
   mac = {{ eq .chezmoi.os "darwin" }}
   linux = {{ eq .chezmoi.os "linux" }}
   windows = {{ eq .chezmoi.os "windows" }}
+  type = {{ $machineType | quote }}
   wsl = {{ $is_wsl }}
   codespace = {{ $is_codespace }}
   dev_container = {{ $is_dev_container }}
   ci = {{ $is_ci }}
   ephemeral = {{ $is_ephemeral }}
-  headless = {{ $is_headless }}

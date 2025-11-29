@@ -1,6 +1,6 @@
 Host *.github.com github.com
   ForwardAgent yes
-{{- if and .machine.linux (not .machine.wsl) }}
+{{- if and .machine.linux (not .machine.wsl) (not .machine.codespace) }}
   IdentityAgent ~/.1password/agent.sock
 {{- else if .machine.wsl }}
   # WSL uses Windows 1Password via npiperelay and socat

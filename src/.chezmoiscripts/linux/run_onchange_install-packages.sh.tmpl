@@ -1,4 +1,3 @@
-{{- if .machine.linux -}}
 #!/bin/bash
 
 install_package_if_missing() {
@@ -30,5 +29,3 @@ install_package_if_missing "socat"
 
 curl -fsSL https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
 curl -fsSL https://aliae.dev/install.sh | bash -s -- -d ~/.local/bin
-
-{{- end -}}

@@ -1,4 +1,4 @@
-{{ if .machine.windows }}
+#{{ if .machine.windows }}
 $packages = @(
     "JanDeDobbeleer.OhMyPosh"
     "JanDeDobbeleer.Aliae"
@@ -7,4 +7,4 @@ $packages = @(
 foreach ($package in $packages) {
     winget install --id $package --exact --accept-source-agreements --accept-package-agreements --disable-interactivity
 }
-{{ end -}}
+#{{ end -}}

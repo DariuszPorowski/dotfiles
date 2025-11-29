@@ -30,24 +30,6 @@ secrets/**
 .terraformrc
 AppData/**
 .config/1Password/**
-.wsl/**
-.wslconfig
-autorun.cmd
-*.reg
-{{- else if not .machine.windows }}
-autorun.cmd
-AppData/**
-.wslconfig
-*.reg
-{{- else }}
-# Windows: skip Linux-specific files
-.config/1Password/**
-.bashrc
-.zshrc
-.zprofile
-.profile
-.terraformrc
-.wsl/**
 {{- end -}}
 
 {{ if ne .chezmoi.os "darwin" }}
@@ -60,4 +42,20 @@ AppData/**
 
 {{ if ne .chezmoi.os "windows" }}
 .chezmoiscripts/windows/**
+AppData/**
+Documents/**
+.wsl/**
+autorun.cmd
+.wslconfig
+{{ end }}
+
+{{ if eq .chezmoi.os "windows" }}
+.local/**
+.bashrc
+.zshrc
+.zprofile
+.profile
+.commonrc
+.dircolors
+.terraformrc
 {{ end }}

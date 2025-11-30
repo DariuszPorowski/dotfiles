@@ -1,15 +1,7 @@
 pkgs:
   windows:
     winget:
-      machine:
-        - Git.Git
-        - Git.GCM
-        - JanDeDobbeleer.Aliae
-        - eza-community.eza
-        - BurntSushi.ripgrep.MSVC
-        - sharkdp.bat
-        - GNU.Nano
-        - Neovim.Neovim
+      machine: []
       user:
         - JanDeDobbeleer.OhMyPosh
     choco: []

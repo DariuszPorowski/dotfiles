@@ -1,0 +1,88 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/configuration/configuration.schema.0.2.json
+---
+resources:
+  - name: Virtualization features
+    type: Microsoft.Windows/WindowsPowerShell
+    properties:
+      resources:
+        - name: Containers
+          type: PSDesiredStateConfiguration/WindowsOptionalFeature
+          properties:
+            Name: containers
+        - name: Microsoft-Hyper-V
+          type: PSDesiredStateConfiguration/WindowsOptionalFeature
+          properties:
+            Name: Microsoft-Hyper-V
+
+properties:
+  configurationVersion: 0.2.0
+  resources:
+    - resource: Microsoft.Windows.Developer/DeveloperMode
+      settings:
+        Ensure: Present
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: windows-terminal
+      settings:
+        source: winget
+        id: Microsoft.WindowsTerminal
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: pwsh
+      settings:
+        source: winget
+        id: Microsoft.PowerShell
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: wsl
+      settings:
+        source: winget
+        id: Microsoft.WSL
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: git
+      settings:
+        id: Git.Git
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: git-credential-manager
+      settings:
+        id: Git.GCM
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: aliae
+      settings:
+        id: JanDeDobbeleer.Aliae
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: eza
+      settings:
+        id: eza-community.eza
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: ripgrep
+      settings:
+        id: BurntSushi.ripgrep.MSVC
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: bat
+      settings:
+        id: sharkdp.bat
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: nano
+      settings:
+        id: GNU.Nano
+        source: winget
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: neovim
+      settings:
+        id: Neovim.Neovim
+        source: winget

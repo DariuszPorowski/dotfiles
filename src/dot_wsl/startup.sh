@@ -15,7 +15,7 @@ CMD_EXE="/mnt/c/Windows/System32/cmd.exe"
 # NOTE: This sourced file must have LF line endings, not CRLF, or the mount command will fail.
 if [[ -f "$(dirname "$0")/startup.env" ]]; then
   # shellcheck disable=SC1091
-  . "$(dirname "$0")/startup.env"
+  source "$(dirname "$0")/startup.env"
 fi
 
 # Set WSL_WORKSPACE_FILE to a default value if not already set in the .env file.

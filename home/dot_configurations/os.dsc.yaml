@@ -52,12 +52,12 @@ properties:
         Ensure: Present
         RestartExplorer: true
 
-    - resource: Microsoft.WinGet.DSC/WinGetPackageManager
-      directives:
-        description: Ensure WinGet is up to date
-        allowPrerelease: true
-      settings:
-        UseLatest: true
+    # - resource: Microsoft.WinGet.DSC/WinGetPackageManager
+    #   directives:
+    #     description: Ensure WinGet is up to date
+    #     allowPrerelease: true
+    #   settings:
+    #     UseLatest: true
 
     - resource: PSDscResources/Registry
       id: set-windows-terminal-as-default-console-1

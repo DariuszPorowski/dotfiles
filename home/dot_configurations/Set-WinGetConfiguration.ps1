@@ -40,4 +40,4 @@ if ($ValidateFirst) {
 Write-Host "Starting WinGet configuration from $YamlConfigFilePath..."
 winget configure --file "$YamlConfigFilePath" --accept-configuration-agreements --ignore-warnings --disable-interactivity
 
-Write-Host 'WinGet configuration complete. A reboot may be required to finish setting up WSL and Docker Desktop.'
+Write-Host 'WinGet configuration complete. A reboot may be required to finish setting up some apps like WSL or Docker Desktop.'

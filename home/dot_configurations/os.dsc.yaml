@@ -93,7 +93,7 @@ properties:
       settings:
         Key: HKEY_CURRENT_USER\Software\Microsoft\Command Processor
         ValueName: AutoRun
-        ValueData: "%USERPROFILE%\autorun.cmd"
+        ValueData: '%USERPROFILE%\autorun.cmd'
         ValueType: String
         Force: true
         Ensure: Present

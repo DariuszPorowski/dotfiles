@@ -1,88 +1,114 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/configuration/configuration.schema.0.2.json
 ---
-resources:
-  - name: Virtualization features
-    type: Microsoft.Windows/WindowsPowerShell
-    properties:
-      resources:
-        - name: Containers
-          type: PSDesiredStateConfiguration/WindowsOptionalFeature
-          properties:
-            Name: containers
-        - name: Microsoft-Hyper-V
-          type: PSDesiredStateConfiguration/WindowsOptionalFeature
-          properties:
-            Name: Microsoft-Hyper-V
-
 properties:
   configurationVersion: 0.2.0
   resources:
-    - resource: Microsoft.Windows.Developer/DeveloperMode
-      settings:
-        Ensure: Present
-
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: windows-terminal
+      directives:
+        description: Windows Terminal
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         source: winget
         id: Microsoft.WindowsTerminal
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: pwsh
+      directives:
+        description: PowerShell
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         source: winget
         id: Microsoft.PowerShell
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: wsl
+      directives:
+        description: Windows Subsystem for Linux
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         source: winget
         id: Microsoft.WSL
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: git
+      directives:
+        description: Git
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         id: Git.Git
         source: winget
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: git-credential-manager
+      directives:
+        description: Git Credential Manager
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         id: Git.GCM
         source: winget
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: aliae
+      directives:
+        description: Aliae
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         id: JanDeDobbeleer.Aliae
         source: winget
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: eza
+      directives:
+        description: EZA
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         id: eza-community.eza
         source: winget
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: ripgrep
+      directives:
+        description: RipGrep
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         id: BurntSushi.ripgrep.MSVC
         source: winget
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: bat
+      directives:
+        description: BAT
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         id: sharkdp.bat
         source: winget
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: nano
+      directives:
+        description: Nano
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         id: GNU.Nano
         source: winget
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: neovim
+      directives:
+        description: NeoVim
+        allowPrerelease: true
+        securityContext: elevated
       settings:
         id: Neovim.Neovim
         source: winget

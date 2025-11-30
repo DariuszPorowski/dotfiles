@@ -1,5 +1,0 @@
-# Set the registry key for running autorun.cmd automatically
-if (-not (Test-Path "HKCU:\Software\Microsoft\Command Processor")) {
-    New-Item -Path "HKCU:\Software\Microsoft\Command Processor" -ItemType Directory
-}
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Command Processor" -Name "AutoRun" -Value "%USERPROFILE%\autorun.cmd"

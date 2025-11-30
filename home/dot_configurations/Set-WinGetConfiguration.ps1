@@ -18,8 +18,8 @@ Set-WinGetConfiguration.ps1 -YamlConfigFilePath ".\configurations.dsc.yaml"
 #Requires -RunAsAdministrator
 
 param (
-    [string]$YamlConfigFilePath = "$PSScriptRoot\configurations.dsc.yaml",
-    [bool]$ValidateFirst = $false
+    [string]$YamlConfigFilePath = "$PSScriptRoot\os.dsc.yaml",
+    [switch]$ValidateFirst = $false
 )
 
 Set-StrictMode -Version Latest

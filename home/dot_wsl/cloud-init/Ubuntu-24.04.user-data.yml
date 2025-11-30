@@ -95,8 +95,8 @@ runcmd:
     TEMP_DEB=$(mktemp)
     wget https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -O "$TEMP_DEB"
     sudo dpkg -i "$TEMP_DEB"
-    rm "$TEMP_DEB"
-    sudo apt-get -y update
-    sudo apt-get -y install powershell
+    rm -f "$TEMP_DEB"
+    sudo apt-get --yes update
+    sudo apt-get --yes install powershell
 
 final_message: cloud-init done

@@ -39,7 +39,7 @@ properties:
         description: Taskbar configuration
         allowPrerelease: true
       settings:
-        SearchBoxMode: ShowIconOnly
+        SearchBoxMode: Hide
         TaskViewButton: Show
         WidgetsButton: Hide
         TaskbarGlomLevel: Always

@@ -52,9 +52,9 @@ tasks:
   run:codespell:
     desc: Run CodeSpell
     preconditions:
-      - sh: task internal:command -- codespell
+      - sh: task -g internal:command -- codespell
         msg: "❌ Error: codespell is not installed. Please run 'task spell:install:codespell'"
-      - sh: task internal:command:version -- "codespell --version" "{{.VERSION.codespell}}"
+      - sh: task -g internal:command:version -- "codespell --version" "{{.VERSION.codespell}}"
         msg: "❌ Version Mismatch: You are not using {{.VERSION.codespell}} version. Please run 'task spell:install:codespell'"
     cmds:
       - codespell --config ~/.linters/.codespellrc --summary --write-changes
@@ -64,9 +64,9 @@ tasks:
   run:cspell:
     desc: Run CSpell
     preconditions:
-      - sh: task internal:command -- cspell
+      - sh: task -g internal:command -- cspell
         msg: "❌ Error: cspell is not installed. Please run 'task spell:install:cspell'"
-      - sh: task internal:command:version -- "cspell --version" "{{.VERSION.cspell}}"
+      - sh: task -g internal:command:version -- "cspell --version" "{{.VERSION.cspell}}"
         msg: "❌ Version Mismatch: You are not using {{.VERSION.cspell}} version. Please run 'task spell:install:cspell'"
     cmds:
       - cspell --config ~/.linters/.cspell.yml "./**/*.md"
@@ -76,9 +76,9 @@ tasks:
   run:lychee:
     desc: Run Lychee
     preconditions:
-      - sh: task internal:command -- lychee
+      - sh: task -g internal:command -- lychee
         msg: "❌ Error: lychee is not installed. Please run 'task spell:install:lychee'"
-      - sh: task internal:command:version -- "lychee --version" "{{.VERSION.lychee}}"
+      - sh: task -g internal:command:version -- "lychee --version" "{{.VERSION.lychee}}"
         msg: "❌ Version Mismatch: You are not using {{.VERSION.lychee}} version. Please run 'task spell:install:lychee'"
     cmds:
       - lychee --config ~/.linters/.lychee.toml --format markdown .

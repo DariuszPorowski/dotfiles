@@ -48,9 +48,9 @@ tasks:
   run:shfmt:
     desc: Run shfmt
     preconditions:
-      - sh: task internal:command -- shfmt
+      - sh: task -g internal:command -- shfmt
         msg: "❌ Error: shfmt is not installed. Please run 'task sh:install:shfmt"
-      - sh: task internal:command:version -- "shfmt --version" "{{.VERSION.shfmt}}"
+      - sh: task -g internal:command:version -- "shfmt --version" "{{.VERSION.shfmt}}"
         msg: "❌ Version Mismatch: You are not using {{.VERSION.shfmt}} version. Please run 'task sh:install:shfmt'"
     vars:
       SHELL_FILES:
@@ -69,9 +69,9 @@ tasks:
   run:shellcheck:
     desc: Run shellcheck
     preconditions:
-      - sh: task internal:command -- shellcheck
+      - sh: task -g internal:command -- shellcheck
         msg: "❌ Error: shellcheck is not installed. Please run 'task sh:install:shellcheck"
-      - sh: task internal:command:version -- "shellcheck --version" "{{.VERSION.shellcheck}}"
+      - sh: task -g internal:command:version -- "shellcheck --version" "{{.VERSION.shellcheck}}"
         msg: "❌ Version Mismatch: You are not using {{.VERSION.shellcheck}} version. Please run 'task sh:install:shellcheck'"
     vars:
       ITEMS:

@@ -124,7 +124,7 @@ tasks:
     desc: go install
     internal: true
     preconditions:
-      - sh: task internal:command -- go
+      - sh: task -g internal:command -- go
         msg: "go is not installed. Please install go: https://go.dev/doc/install"
     requires:
       vars: [APP]
@@ -135,7 +135,7 @@ tasks:
     desc: winget install
     internal: true
     preconditions:
-      - sh: task internal:command -- winget
+      - sh: task -g internal:command -- winget
         msg: "winget is not installed. Please install winget: https://learn.microsoft.com/windows/package-manager/winget/"
     requires:
       vars: [APP]
@@ -151,7 +151,7 @@ tasks:
     desc: brew install
     internal: true
     preconditions:
-      - sh: task internal:command -- brew
+      - sh: task -g internal:command -- brew
         msg: brew is not installed. Please install brew.
     requires:
       vars: [APP]
@@ -163,7 +163,7 @@ tasks:
     desc: brew tap
     internal: true
     preconditions:
-      - sh: task internal:command -- brew
+      - sh: task -g internal:command -- brew
         msg: brew is not installed. Please install brew.
     requires:
       vars: [APP]
@@ -175,7 +175,7 @@ tasks:
     desc: pipx install
     internal: true
     preconditions:
-      - sh: task internal:command -- pipx
+      - sh: task -g internal:command -- pipx
         msg: "pipx is not installed. Please install pipx: https://pipx.pypa.io/"
     requires:
       vars: [APP]
@@ -186,7 +186,7 @@ tasks:
     desc: npm install
     internal: true
     preconditions:
-      - sh: task internal:command -- npm
+      - sh: task -g internal:command -- npm
         msg: "npm is not installed. Please install npm: https://docs.npmjs.com/cli/commands/npm"
     requires:
       vars: [APP]
@@ -197,7 +197,7 @@ tasks:
     desc: uv install
     internal: true
     preconditions:
-      - sh: task internal:command -- uv
+      - sh: task -g internal:command -- uv
         msg: uv is not installed. Please install by running 'task runtime:setup:uv'
     requires:
       vars: [APP]

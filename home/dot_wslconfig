@@ -1,0 +1,22 @@
+# ~/.wslconfig
+
+# Settings apply across all Linux distros running on WSL 2
+[wsl2]
+guiApplications=true
+
+# https://learn.microsoft.com/en-us/windows/wsl/networking#dns-tunneling
+dnsTunneling=true
+
+# https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking
+# networkingMode=mirrored
+
+# https://github.com/microsoft/WSL/issues/11980#issuecomment-2412350798
+# networkingMode=virtioProxy
+
+# Turns on output console showing contents of dmesg when opening a WSL 2 distro for debugging
+# debugConsole=true
+
+# Enable experimental features
+[experimental]
+sparseVhd=true
+bestEffortDnsParsing=true

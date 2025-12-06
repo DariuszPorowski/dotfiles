@@ -1,0 +1,29 @@
+# ~/.gh_personal.gitconfig
+
+{{- if .machine.ephemeral }}
+# Ephemeral environment: use environment-provided identity
+# [user]
+#   name = {{ env "GITHUB_USER" | default .github.username | quote }}
+#   email = {{ env "GITHUB_USER" | default .github.username }}@users.noreply.github.com
+
+# [credential "https://github.com"]
+#   username = {{ env "GITHUB_USER" | default .github.username | quote }}
+
+[github]
+  user = {{ env "GITHUB_USER" | default .github.username | quote }}
+{{- else }}
+{{- $config := joinPath .chezmoi.sourceDir "encrypted" "gh_personal.yaml.age" | include | decrypt | fromYaml }}
+[user]
+  name = {{ $config.name | quote }}
+  email = {{ $config.email | quote }}
+  signingkey = {{ $config.signing_key }}
+
+[credential "https://github.com"]
+  username = {{ $config.github_username | quote }}
+
+[github]
+  user = {{ $config.github_username | quote }}
+{{- end }}
+
+[credential]
+  namespace = personal

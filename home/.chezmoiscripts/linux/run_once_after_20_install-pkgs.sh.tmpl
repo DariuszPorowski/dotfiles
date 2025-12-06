@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
+install_package_if_missing() {
+  local package_name="$1"
+
+  if ! command -v "${package_name}" >/dev/null 2>&1; then
+    echo "${package_name} is not installed. Installing ${package_name}..."
+
+    if command -v apt >/dev/null 2>&1; then
+      sudo apt update && sudo apt install --yes "${package_name}"
+    elif command -v apt-get >/dev/null 2>&1; then
+      sudo apt-get update && sudo apt-get install --yes "${package_name}"
+    elif command -v dnf >/dev/null 2>&1; then
+      sudo dnf install -y "${package_name}"
+    elif command -v yum >/dev/null 2>&1; then
+      sudo yum install -y "${package_name}"
+    else
+      echo "Error: No supported package manager found. Please install ${package_name} manually." >&2
+      exit 1
+    fi
+  else
+    echo "${package_name} is already installed. Skipping."
+  fi
+}
+
+{{- if .machine.wsl }}
+install_package_if_missing "socat"
+{{- end }}
+
+if ! command -v task >/dev/null 2>&1; then
+  sh -c "$(curl -fsSL https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
+fi
+
+if ! command -v oh-my-posh >/dev/null 2>&1; then
+  curl -fsSL https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+fi
+
+if ! command -v aliae >/dev/null 2>&1; then
+  curl -fsSL https://aliae.dev/install.sh | bash -s -- -d ~/.local/bin
+fi

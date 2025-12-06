@@ -1,0 +1,15 @@
+[Unit]
+Description=1Password SSH Agent Relay
+After=network.target
+
+[Service]
+ExecStartPre=/bin/rm -f %h/.ssh/agent.sock
+ExecStart=%h/.local/bin/1p-ssh-agent-relay.sh
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

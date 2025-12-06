@@ -1,0 +1,60 @@
+# hash: {{ include (joinPath .chezmoi.sourceDir ".chezmoitemplates/powershell_profile.ps1") | sha256sum }}
+
+# Set strict mode and error preference
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+# Define Source
+$source = Join-Path "$env:USERPROFILE" '.config' 'powershell'
+
+# Define Destinations
+$destinations = @(
+    Join-Path "$env:USERPROFILE" 'Documents' 'PowerShell'
+    Join-Path "$env:USERPROFILE" 'Documents' 'WindowsPowerShell'
+)
+
+if ($env:OneDriveCommercial) {
+    $destinations += Join-Path $env:OneDriveCommercial 'Documents' 'PowerShell'
+    $destinations += Join-Path $env:OneDriveCommercial 'Documents' 'WindowsPowerShell'
+}
+# Ensure Source exists
+if (-not (Test-Path -LiteralPath $source)) {
+    Write-Warning "Source directory not found: $source"
+    exit
+}
+
+foreach ($dest in $destinations) {
+
+    # Create destination directory if it does not exist
+    if (-not (Test-Path -LiteralPath $dest)) {
+        New-Item -Path $dest -ItemType Directory -Force | Out-Null
+    }
+
+    # Process .ps1 files (Mandatory updates)
+    Get-ChildItem -LiteralPath $source -Filter "*.ps1" -File | ForEach-Object {
+        $sourceFile = $_
+        $destFilePath = Join-Path $dest $sourceFile.Name
+        $shouldCopy = $false
+
+        if (-not (Test-Path -LiteralPath $destFilePath)) {
+            # Destination file does not exist
+            $shouldCopy = $true
+        }
+        else {
+            $destFileItem = Get-Item -LiteralPath $destFilePath -Force
+
+            # Compare content (Binary comparison equivalent to fc /b)
+            $sourceHash = Get-FileHash -LiteralPath $sourceFile.FullName -Algorithm SHA256
+            $destHash = Get-FileHash -LiteralPath $destFilePath -Algorithm SHA256
+
+            if ($sourceHash.Hash -ne $destHash.Hash) {
+                $shouldCopy = $true
+            }
+        }
+
+        if ($shouldCopy) {
+            Write-Host "Copying $($sourceFile.Name) to $dest"
+            Copy-Item -LiteralPath $sourceFile.FullName -Destination $destFilePath -Force
+        }
+    }
+}

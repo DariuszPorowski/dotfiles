@@ -1,0 +1,62 @@
+README.md
+*.age
+
+src/
+src/*
+src/**
+docs/
+docs/*
+docs/**
+encrypted/
+encrypted/*
+encrypted/**
+secrets/
+secrets/*
+secrets/**
+
+{{- if not .machine.wsl }}
+.local/bin/1p-ssh-agent-relay.sh
+.local/bin/ssh-relay.sh
+.local/bin/npiperelay-symlink.sh
+.config/systemd/
+.config/systemd/**
+{{- end }}
+
+{{- if .machine.ephemeral }}
+# Ephemeral environments (Codespaces/Dev Containers): skip files requiring encryption or local 1Password
+.gh_personal.gitconfig
+.gh_microsoft.gitconfig
+.azdo_microsoft.gitconfig
+.terraformrc
+AppData/**
+.config/1Password/**
+{{- end }}
+
+{{ if ne .chezmoi.os "darwin" }}
+.chezmoiscripts/darwin/**
+{{- end }}
+
+{{ if ne .chezmoi.os "linux" }}
+.chezmoiscripts/linux/**
+{{- end }}
+
+{{ if ne .chezmoi.os "windows" }}
+.chezmoiscripts/windows/**
+AppData/**
+Documents/**
+.configurations/**
+.wsl/**
+autorun.cmd
+.wslconfig
+{{- end }}
+
+{{ if eq .chezmoi.os "windows" }}
+.local/**
+.bashrc
+.zshrc
+.zprofile
+.profile
+.commonrc
+.dircolors
+.terraformrc
+{{- end }}

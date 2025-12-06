@@ -1,0 +1,16 @@
+# ~/.gitignore
+
+# MacOS
+.DS_Store
+*.xcuserdatad/
+ModuleCache
+
+# JavaScript
+/node_modules/
+
+# Python
+/__pycache__/
+
+# Custom
+.dev
+.task

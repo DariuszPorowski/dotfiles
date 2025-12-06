@@ -1,0 +1,165 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/configuration/configuration.schema.0.2.json
+---
+resources:
+  - name: Virtualization features
+    type: Microsoft.Windows/WindowsPowerShell
+    properties:
+      resources:
+        - name: Containers
+          type: PSDesiredStateConfiguration/WindowsOptionalFeature
+          properties:
+            Name: containers
+        - name: Microsoft-Hyper-V
+          type: PSDesiredStateConfiguration/WindowsOptionalFeature
+          properties:
+            Name: Microsoft-Hyper-V
+
+properties:
+  configurationVersion: 0.2.0
+  resources:
+    - resource: Microsoft.Windows.Developer/DeveloperMode
+      directives:
+        description: Enable Developer Mode
+        allowPrerelease: true
+        securityContext: elevated
+      settings:
+        Ensure: Present
+
+    - resource: Microsoft.Windows.Developer/ShowSecondsInClock
+      directives:
+        description: Show seconds in the clock
+        allowPrerelease: true
+        securityContext: elevated
+      settings:
+        Ensure: Present
+
+    - resource: Microsoft.Windows.Developer/EnableLongPathSupport
+      directives:
+        description: Enable long path support
+        allowPrerelease: true
+        securityContext: elevated
+      settings:
+        Ensure: Present
+
+    - resource: Microsoft.Windows.Developer/WindowsExplorer
+      directives:
+        description: Show file extensions
+        allowPrerelease: true
+      settings:
+        FileExtensions: Show
+        HiddenFiles: Hide
+        ItemCheckBoxes: Hide
+
+    - resource: Microsoft.Windows.Developer/Taskbar
+      directives:
+        description: Taskbar configuration
+        allowPrerelease: true
+      settings:
+        Alignment: Middle
+        SearchBoxMode: Hide
+        TaskViewButton: Show
+        WidgetsButton: Hide
+
+    - resource: Microsoft.Windows.Developer/EnableDarkMode
+      directives:
+        description: Enable dark mode
+        allowPrerelease: true
+      settings:
+        Ensure: Present
+        RestartExplorer: true
+
+    # - resource: Microsoft.WinGet.DSC/WinGetPackageManager
+    #   directives:
+    #     description: Ensure WinGet is up to date
+    #     allowPrerelease: true
+    #   settings:
+    #     UseLatest: true
+
+    - resource: PSDscResources/Registry
+      id: enable-sudo
+      directives:
+        description: Enable sudo functionality
+        allowPrerelease: true
+      settings:
+        Key: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo
+        ValueName: Enabled
+        ValueData: 3
+        ValueType: DWORD
+        Force: true
+        Ensure: Present
+
+    - resource: PSDscResources/Registry
+      id: disable-recall-1
+      directives:
+        description: Disable Windows Recalls (part 1)
+        allowPrerelease: true
+      settings:
+        Key: HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsAI
+        ValueName: DisableAIDataAnalysis
+        ValueData: 1
+        ValueType: DWORD
+        Force: true
+        Ensure: Present
+
+    - resource: PSDscResources/Registry
+      id: disable-recall-2
+      directives:
+        description: Disable Windows Recalls (part 2)
+        allowPrerelease: true
+      settings:
+        Key: HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsAI
+        ValueName: AllowRecallEnablement
+        ValueData: 0
+        ValueType: DWORD
+        Force: true
+        Ensure: Present
+
+    - resource: PSDscResources/Registry
+      id: set-windows-terminal-as-default-console-1
+      directives:
+        description: Set Windows Terminal as the default console (part 1)
+        allowPrerelease: true
+      settings:
+        Key: HKEY_CURRENT_USER\Console\%%Startup
+        ValueName: DelegationConsole
+        ValueData: "{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}"
+        ValueType: String
+        Force: true
+        Ensure: Present
+
+    - resource: PSDscResources/Registry
+      id: set-windows-terminal-as-default-console-2
+      directives:
+        description: Set Windows Terminal as the default console (part 2)
+        allowPrerelease: true
+      settings:
+        Key: HKEY_CURRENT_USER\Console\%%Startup
+        ValueName: DelegationTerminal
+        ValueData: "{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}"
+        ValueType: String
+        Force: true
+        Ensure: Present
+
+    - resource: PSDscResources/Registry
+      id: set-autorun
+      directives:
+        description: Set AutoRun for Command Processor
+        allowPrerelease: true
+      settings:
+        Key: HKEY_CURRENT_USER\Software\Microsoft\Command Processor
+        ValueName: AutoRun
+        ValueData: '%USERPROFILE%\autorun.cmd'
+        ValueType: String
+        Force: true
+        Ensure: Present
+
+    - resource: PSDscResources/Service
+      id: ssh-agent
+      directives:
+        description: Disable OpenSSH Authentication Agent
+        allowPrerelease: true
+        securityContext: elevated
+      settings:
+        Name: ssh-agent
+        StartupType: Disabled
+        State: Stopped

@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+# docs: https://taskfile.dev
+---
+version: "3"
+
+tasks:
+  # * Install Azure CLI
+  install:az:
+    desc: Install Azure CLI
+    cmds:
+      - task: :internal:_install:winget
+        vars:
+          APP: Microsoft.AzureCLI
+          VERSION: "{{.VERSION.az}}"
+      - task: :internal:_install:brew
+        vars:
+          APP: azure-cli@{{.VERSION.az}}
+      - cmd: |
+          sudo ./scripts/install_az.sh "{{.VERSION.az}}"
+        platforms: [linux]
+    dir: "{{.TASKFILE_DIR}}"
+
+
+  # * Install Azure Developer CLI
+  install:azd:
+    desc: Install Azure CLI
+    cmds:
+      - task: :internal:_install:winget
+        vars:
+          APP: Microsoft.Azd
+          VERSION: "{{.VERSION.azd}}"
+      - task: :internal:_install:brew:tap
+        vars:
+          APP: azure/azd
+      - task: :internal:_install:brew
+        vars:
+          APP: azd@{{.VERSION.azd}}
+      - cmd: |
+          ./scripts/install_azd.sh "{{.VERSION.azd}}"
+        platforms: [linux]
+    dir: "{{.TASKFILE_DIR}}"
+
+  # * Install Bicep
+  install:bicep:
+    desc: Install Bicep
+    cmds:
+      - task: :internal:_install:winget
+        vars:
+          APP: Microsoft.Bicep
+          VERSION: "{{.VERSION.bicep}}"
+      - task: :internal:_install:brew:tap
+        vars:
+          APP: azure/bicep
+      - task: :internal:_install:brew
+        vars:
+          APP: bicep@{{.VERSION.bicep}}
+      - cmd: |
+          ./scripts/install_bicep.sh "{{.VERSION.bicep}}"
+        platforms: [linux]
+    dir: "{{.TASKFILE_DIR}}"
+
+  # * Tools
+  tools:
+    desc: Install Azure tools
+    vars:
+      ITEMS:
+        - az
+        - azd
+        - bicep
+    cmds:
+      - for: { var: ITEMS }
+        task: install:{{.ITEM}}

@@ -1,0 +1,25 @@
+---
+pkgs:
+  windows:
+    winget:
+      machine: []
+      user:
+        # - JanDeDobbeleer.OhMyPosh
+        # - JanDeDobbeleer.Aliae
+        # - AgileBits.1Password
+        # - AgileBits.1Password.CLI
+        # - Microsoft.Sysinternals.Suite
+        - id: Microsoft.VisualStudioCode
+          override: /VERYSILENT /MERGETASKS=!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath
+        - id: Microsoft.VisualStudioCode.Insiders
+          override: /VERYSILENT /MERGETASKS=!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath
+    choco: []
+    scoop: []
+    psGallery:
+      - Microsoft.WinGet.Client
+      - Microsoft.WinGet.DSC
+      - Microsoft.WinGet.Configuration
+      - Microsoft.WinGet.CommandNotFound
+      - Terminal-Icons
+      - PSReadLine
+      - PSScriptAnalyzer

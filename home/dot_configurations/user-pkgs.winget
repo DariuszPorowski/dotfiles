@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/configuration/configuration.schema.0.2.json
+---
+properties:
+  configurationVersion: 0.2.0
+  resources:
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: JanDeDobbeleer.OhMyPosh
+      directives:
+        description: Oh My Posh
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: JanDeDobbeleer.OhMyPosh
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: JanDeDobbeleer.Aliae
+      directives:
+        description: Aliae
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: JanDeDobbeleer.Aliae
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: AgileBits.1Password
+      directives:
+        description: 1Password
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: AgileBits.1Password
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: AgileBits.1Password.CLI
+      directives:
+        description: 1Password CLI
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: AgileBits.1Password.CLI
+
+    # - resource: Microsoft.WinGet.DSC/WinGetPackage
+    #   id: Microsoft.VisualStudioCode
+    #   directives:
+    #     description: Visual Studio Code
+    #     allowPrerelease: true
+    #   settings:
+    #     source: winget
+    #     id: Microsoft.VisualStudioCode
+
+    # - resource: Microsoft.WinGet.DSC/WinGetPackage
+    #   id: Microsoft.VisualStudioCode.Insiders
+    #   directives:
+    #     description: Visual Studio Code (Insiders)
+    #     allowPrerelease: true
+    #   settings:
+    #     source: winget
+    #     id: Microsoft.VisualStudioCode.Insiders

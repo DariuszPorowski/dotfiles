@@ -1,0 +1,36 @@
+# Self-elevate the script if required
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    $currentProcess = Get-Process -Id $PID
+    $argumentList = "-File `"$($MyInvocation.MyCommand.Path)`" $($MyInvocation.UnboundArguments)"
+    Start-Process -FilePath $currentProcess.Path -Verb RunAs -ArgumentList $argumentList -Wait
+    Exit
+}
+
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+
+if (-not (Get-Command "winget" -ErrorAction SilentlyContinue)) {
+    Write-Error "WinGet hasn't been installed!"
+    exit
+}
+
+# winget settings --enable InstallerHashOverride
+
+{{- if .pkgs.windows.winget -}}
+
+Write-Host 'INSTALLING WINGET PACKAGES (MACHINE)...'
+
+$machinePackages = @(
+{{- range .pkgs.windows.winget.machine }}
+    "{{ . }}"
+{{- end }}
+)
+
+foreach ($pkg in $machinePackages) {
+    Write-Host "Installing machine-scope package: $pkg"
+    winget install --id "$pkg" --exact --accept-source-agreements --accept-package-agreements --disable-interactivity --scope machine
+}
+
+{{- end }}
+
+Write-Host 'UPGRADING WINGET PACKAGES (MACHINE)...'
+winget upgrade --all --accept-package-agreements --accept-source-agreements --disable-interactivity --scope machine

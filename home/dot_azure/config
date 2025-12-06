@@ -1,0 +1,6 @@
+[cloud]
+name = AzureCloud
+
+[core]
+login_experience_v2 = off
+enable_broker_on_windows = false

@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://aliae.dev/schema.json
+# docs: https://aliae.dev/docs
+---
+path:
+  - value: |
+      {{ .Home }}/bin/
+      {{ .Home }}/local/bin/
+      {{ .Home }}/go/bin/
+      {{ .Home }}/.go/bin/
+      {{ .Home }}/.local/bin/
+      {{ .Home }}/.cargo/bin/
+# script:
+#   - if: and (hasCommand "oh-my-posh") (match .Shell "pwsh")
+#     value: |
+#       oh-my-posh init pwsh | Invoke-Expression
+#   - if: and (hasCommand "oh-my-posh") (match .Shell "bash" "zsh")
+#     value: |
+#       eval "$(oh-my-posh init {{ .Shell }})"

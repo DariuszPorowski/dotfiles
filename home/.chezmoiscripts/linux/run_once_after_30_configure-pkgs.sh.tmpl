@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
+if command -v oh-my-posh >/dev/null 2>&1; then
+  oh-my-posh font install meslo
+fi

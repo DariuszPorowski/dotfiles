@@ -1,0 +1,26 @@
+# Allow modular configs (mainly to avoid exposing internal infrastructure)
+# https://superuser.com/a/1142813
+Include ./*.conf
+
+Host *.github.com github.com
+  ForwardAgent yes
+{{- if and .machine.linux (not .machine.wsl) (not .machine.codespace) }}
+  IdentityAgent ~/.1password/agent.sock
+{{- else if .machine.wsl }}
+  # WSL uses Windows 1Password via npiperelay and socat
+  # Install npiperelay and socat, then configure
+  # https://github.com/ran-dall/WSL/tree/main/Scripts/Deploy-1PasswordSSHAgentRelay
+  # IdentityAgent "~/.ssh/agent.sock"
+  IdentityAgent $SSH_AUTH_SOCK
+{{- else if .machine.mac }}
+  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+{{- else if .machine.windows }}
+  # IdentityAgent "\\.\pipe\openssh-ssh-agent"
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+Host *
+  # Persist keys across restarts
+  # https://unix.stackexchange.com/a/140077
+  UseKeychain yes
+{{- end }}

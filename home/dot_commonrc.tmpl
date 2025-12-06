@@ -1,0 +1,113 @@
+# shellcheck shell=sh
+
+# Helper function to detect current shell
+_detect_shell() {
+  if [ -n "$BASH_VERSION" ]; then
+    echo "bash"
+  elif [ -n "$ZSH_VERSION" ]; then
+    echo "zsh"
+  elif [ -n "$FISH_VERSION" ]; then
+    echo "fish"
+  else
+    basename "${SHELL:-sh}"
+  fi
+}
+
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && command -v dbus-daemon >/dev/null 2>&1; then
+    uid=$(id -u)
+    dbus-daemon --session --address=unix:path=/run/user/$uid/bus --fork
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus"
+fi
+
+{{- if .machine.wsl }}
+CMD_EXE="/mnt/c/Windows/System32/cmd.exe"
+windowsUsername="$($CMD_EXE /c "echo %username%" | tr -d '\r')"
+{{- end }}
+
+# Add directories to PATH
+for dir in \
+  "$HOME/bin" \
+  "$HOME/local/bin" \
+  "$HOME/.local/bin" \
+  "$HOME/.cargo/bin" \
+{{- if .machine.wsl }}
+  "/mnt/c/Windows/System32/OpenSSH" \
+  "/mnt/c/Program Files/Microsoft VS Code/bin" \
+  "/mnt/c/Users/$windowsUsername/AppData/Local/Programs/Microsoft VS Code/bin" \
+{{- end }}
+; do
+  case ":$PATH:" in
+  *":$dir:"*) ;;
+  *) [ -d "$dir" ] && PATH="$PATH:$dir" ;;
+  esac
+done
+export PATH
+
+if command -v go &>/dev/null; then
+  export GOBIN="$(go env GOPATH)/bin"
+fi
+
+if [ -f "$HOME/.local/bin/1p-ssh-agent-relay.sh" ]; then
+  "$HOME/.local/bin/1p-ssh-agent-relay.sh"
+fi
+
+if [ -f "$HOME/.local/bin/ssh-relay.sh" ]; then
+  . "$HOME/.local/bin/ssh-relay.sh"
+fi
+
+if command -v aliae >/dev/null 2>&1; then
+  eval "$(aliae init "$(_detect_shell)")"
+fi
+
+if command -v oh-my-posh >/dev/null 2>&1; then
+  POSH_CONFIG_PATH="$HOME/.oh-my-posh.json"
+  if [ -f "$POSH_CONFIG_PATH" ]; then
+    eval "$(oh-my-posh init "$(_detect_shell)" --config "$POSH_CONFIG_PATH")"
+  else
+    eval "$(oh-my-posh init "$(_detect_shell)")"
+  fi
+fi
+
+if command -v chezmoi >/dev/null 2>&1; then
+  eval "$(chezmoi completion "$(_detect_shell)")"
+fi
+
+if command -v uv >/dev/null 2>&1; then
+  eval "$(uv generate-shell-completion "$(_detect_shell)")"
+fi
+
+if command -v uvx >/dev/null 2>&1; then
+  eval "$(uvx --generate-shell-completion "$(_detect_shell)")"
+fi
+
+if command -v helm >/dev/null 2>&1; then
+  eval "$(helm completion "$(_detect_shell)")"
+fi
+
+if command -v gh >/dev/null 2>&1; then
+  eval "$(gh completion --shell "$(_detect_shell)")"
+fi
+
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+  alias ls='ls --color=auto'
+  alias dir='dir --color=auto'
+  alias vdir='vdir --color=auto'
+
+  alias grep='grep --color=auto'
+  alias fgrep='fgrep --color=auto'
+  alias egrep='egrep --color=auto'
+fi
+
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# fnm
+FNM_PATH="${HOME}/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "$(fnm env --use-on-cd --version-file-strategy=recursive --shell "$(_detect_shell)")"
+fi

@@ -1,0 +1,18 @@
+provider_installation {
+{{- if .machine.windows }}
+  dev_overrides {
+    "microsoft/fabric" = "X:\\gh_personal\\microsoft\\terraform-provider-fabric\\bin\\windows-amd64"
+  }
+{{- else if .machine.wsl }}
+  dev_overrides {
+    "microsoft/fabric" = "/mnt/x/gh_personal/microsoft/terraform-provider-fabric/bin/linux-amd64"
+  }
+{{- end }}
+
+  # Install all other providers directly from their origin provider
+  # registries as normal. If you omit this, no other providers will be available.
+  direct {}
+}
+
+disable_checkpoint           = true
+disable_checkpoint_signature = true

@@ -1,0 +1,151 @@
+# ~/.gitconfig
+
+[init]
+  defaultBranch = main
+
+[fetch]
+  prune = true
+  pruneTags = true
+  all = true
+
+[pull]
+  rebase = true
+
+[push]
+  autoSetupRemote = true
+  default = current
+
+[rebase]
+  autoSquash = true
+  autoStash = true
+  updateRefs = true
+  stat = true
+
+[submodule]
+  recurse = true
+
+[color]
+  ui = auto
+
+[commit]
+  gpgSign = true
+
+[core]
+  autoCrlf = input
+  fscache = true
+  symlinks = true
+  ignoreCase = false
+  fsMonitor = false
+  fileMode = true
+{{- if .machine.wsl }}
+  # WSL-specific settings
+  excludesfile = "//mnt/c/Users/{{- .username -}}/.gitignore"
+  attributesfile = "//mnt/c/Users/{{- .username -}}/.gitattributes"
+{{- else }}
+  excludesfile = ~/.gitignore
+  attributesfile = ~/.gitattributes
+{{- end }}
+
+[filter.lfs]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+
+{{- if .machine.windows }}
+  # Windows-specific settings
+  sshCommand = "C:/Windows/System32/OpenSSH/ssh.exe"
+  longpaths = true
+  editor = "code" --wait
+{{- else if .machine.wsl }}
+  # WSL-specific settings
+  sshCommand = "//mnt/c/Windows/System32/OpenSSH/ssh.exe"
+{{- end }}
+
+{{- if not .machine.ephemeral }}
+
+[gpg]
+  format = ssh
+
+[gpg.ssh]
+{{- if .machine.windows }}
+  # Windows-specific settings
+  program = "C:/Users/{{- .username -}}/AppData/Local/Microsoft/WindowsApps/op-ssh-sign.exe"
+{{- else if .machine.wsl }}
+  # WSL-specific settings
+  program = "/mnt/c/Users/{{- .username -}}/AppData/Local/Microsoft/WindowsApps/op-ssh-sign.exe"
+{{- end }}
+{{- end }}
+
+{{- if not .machine.ephemeral }}
+[credential]
+  azreposCredentialType = oauth
+  bitbucketAuthModes = oauth
+  gitHubAuthModes = oauth
+  gitLabAuthModes = browser
+  msauthUseBroker = true
+  helper =
+{{- if .machine.windows }}
+  helper = manager
+{{- else if .machine.wsl }}
+  # WSL-specific settings
+  helper = "/mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe"
+{{- end }}
+
+[credential "https://dev.azure.com"]
+  useHttpPath = true
+{{- end }}
+
+{{- if .machine.windows }}
+# Windows-specific settings
+[includeIf "gitdir/i:X:/gh_personal/**"]
+  path = ~/.gh_personal.gitconfig
+[includeIf "gitdir/i:X:/gh_microsoft/**"]
+  path = ~/.gh_microsoft.gitconfig
+[includeIf "gitdir/i:X:/azdo_microsoft/**"]
+  path = ~/.azdo_microsoft.gitconfig
+[includeIf "gitdir/i:~/.local/share/chezmoi/**"]
+  path = ~/.gh_personal.gitconfig
+{{- else if .machine.wsl }}
+# WSL-specific settings
+[includeIf "gitdir/i:/mnt/x/gh_personal/**"]
+  path = /mnt/c/Users/{{- .username -}}/.gh_personal.gitconfig
+[includeIf "gitdir/i:/mnt/x/gh_microsoft/**"]
+  path = /mnt/c/Users/{{- .username -}}/.gh_microsoft.gitconfig
+[includeIf "gitdir/i:/mnt/x/azdo_microsoft/**"]
+  path = /mnt/c/Users/{{- .username -}}/.azdo_microsoft.gitconfig
+[includeIf "gitdir/i:/mnt/c/Users/{{- .username -}}/.local/share/chezmoi/**"]
+  path = /mnt/c/Users/{{- .username -}}/.gh_personal.gitconfig
+[includeIf "gitdir/i:~/.local/share/chezmoi/**"]
+  path = /mnt/c/Users/{{- .username -}}/.gh_personal.gitconfig
+
+[includeIf "gitdir/i:/mnt/wsl/workspaces/gh_personal/**"]
+  path = /mnt/c/Users/{{- .username -}}/.gh_personal.gitconfig
+[includeIf "gitdir/i:/mnt/wsl/workspaces/gh_microsoft/**"]
+  path = /mnt/c/Users/{{- .username -}}/.gh_microsoft.gitconfig
+[includeIf "gitdir/i:/mnt/wsl/workspaces/azdo_microsoft/**"]
+  path = /mnt/c/Users/{{- .username -}}/.azdo_microsoft.gitconfig
+
+[includeIf "gitdir/i:/workspaces/gh_personal/**"]
+  path = /mnt/c/Users/{{- .username -}}/.gh_personal.gitconfig
+[includeIf "gitdir/i:/workspaces/gh_microsoft/**"]
+  path = /mnt/c/Users/{{- .username -}}/.gh_microsoft.gitconfig
+[includeIf "gitdir/i:/workspaces/azdo_microsoft/**"]
+  path = /mnt/c/Users/{{- .username -}}/.azdo_microsoft.gitconfig
+{{- end }}
+
+{{- if .machine.ephemeral }}
+{{- includeTemplate "dot_gh_personal.gitconfig.tmpl" . -}}
+{{- end }}
+
+{{- if not .machine.ephemeral }}
+{{- $config := joinPath .chezmoi.sourceDir "encrypted" "azdo_microsoft.yaml.age" | include | decrypt | fromYaml }}
+{{ range $config.organizations -}}
+[credential "azrepos:org/{{ .name }}"]
+  azureAuthority = https://login.microsoftonline.com/{{ .tenant_id }}
+  username = {{ $config.email }}
+{{ end }}
+{{- end }}
+
+[alias]
+  logp = log --graph --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --date=relative

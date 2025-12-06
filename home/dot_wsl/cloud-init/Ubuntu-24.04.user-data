@@ -1,0 +1,117 @@
+#cloud-config
+# yaml-language-server: $schema=https://raw.githubusercontent.com/canonical/cloud-init/main/cloudinit/config/schemas/schema-cloud-config-v1.json
+---
+locale: en_US.UTF-8
+
+users:
+  - name: __USERNAME__
+    gecos: __USERNAME__
+    groups: users,sudo,netdev,audio
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: true
+
+disable_root: true
+
+write_files:
+  - path: /etc/wsl.conf
+    content: |
+      [boot]
+      systemd = true
+      command = "/mnt/c/Users/__USERNAME__/.wsl/startup.sh"
+
+      [user]
+      default = __USERNAME__
+
+      [network]
+      hostname = __HOSTNAME__
+      # generateHosts = false
+      # generateResolvConf = false
+
+      [interop]
+      enabled = true
+      appendWindowsPath = false
+
+      [automount]
+      enabled = true
+      mountFsTab = true
+
+  - path: /etc/fstab
+    content: |
+      C:	/mnt/c	drvfs	rw,noatime 0 0
+      # D:	/mnt/d	drvfs	rw,noatime 0 0
+      # X:	/mnt/x	drvfs	rw,noatime 0 0
+
+apt:
+  sources:
+    git-core:
+      source: ppa:git-core/ppa
+    golang:
+      source: ppa:longsleep/golang-backports
+
+# update apt database
+package_update: true
+# upgrade the system
+package_upgrade: true
+# reboot after package install if necessary
+package_reboot_if_required: true
+
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - wget
+  - gpg
+  - gnupg2
+  - dos2unix
+  - software-properties-common
+  - apache2-utils
+  - git
+  - jq
+  - make
+  - build-essential
+  - unzip
+  - zip
+  - dnsutils
+  - direnv
+  - mc
+  - zsh
+  - age
+  - golang-go
+  - ntp
+  - net-tools
+  - socat
+
+runcmd:
+  - |
+    # Set the hostname
+
+    hostnamectl set-hostname __HOSTNAME__
+  - |
+    # Update /etc/hosts with the new hostname
+
+    NEW_HOSTNAME=$(hostname)
+    HOSTS_FILE="/etc/hosts"
+
+    if grep -q "^127.0.1.1" "$HOSTS_FILE"; then
+        sudo sed -i "s/^127.0.1.1.*/127.0.1.1\t${NEW_HOSTNAME}.localdomain\t${NEW_HOSTNAME}/" "$HOSTS_FILE"
+    else
+        echo -e "127.0.1.1\t${NEW_HOSTNAME}.localdomain\t${NEW_HOSTNAME}" | sudo tee -a "$HOSTS_FILE"
+    fi
+  - |
+    # Install PowerShell
+
+    TEMP_DEB=$(mktemp)
+    wget https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -O "$TEMP_DEB"
+    sudo dpkg -i "$TEMP_DEB"
+    rm -f "$TEMP_DEB"
+    sudo apt-get --yes update
+    sudo apt-get --yes install powershell
+  - |
+    # Install Taskfile
+
+    curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | sudo -E bash
+    sudo apt-get --yes update
+    sudo apt-get --yes install task
+
+final_message: cloud-init done

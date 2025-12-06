@@ -1,0 +1,19 @@
+Write-Host 'APPLYING WINGET CONFIGURATION (MACHINE)'
+
+$scriptPath = Join-Path "$env:USERPROFILE" '.configurations' 'Set-WinGetConfiguration.ps1'
+
+# hash: {{ include (joinPath .chezmoi.sourceDir "dot_configurations/machine-pkgs.winget") | sha256sum }}
+$config = Join-Path "$env:USERPROFILE" '.configurations' 'machine-pkgs.winget'
+& $scriptPath -Sudo -YamlConfigFilePath "$config" -ValidateFirst
+
+Write-Host 'CONFIGURING PACKAGES (MACHINE)...'
+
+if (Get-Command "fnm" -ErrorAction SilentlyContinue) {
+    Write-Host 'Installing Node.js...'
+    fnm install --lts
+}
+
+if (Get-Command "uv" -ErrorAction SilentlyContinue) {
+    Write-Host 'Installing Python...'
+    uv python install --default "3.14" --preview-features python-install-default
+}

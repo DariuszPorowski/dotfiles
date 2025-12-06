@@ -1,0 +1,7 @@
+Write-Host 'APPLYING WINGET CONFIGURATION (USER)'
+
+$scriptPath = Join-Path "$env:USERPROFILE" '.configurations' 'Set-WinGetConfiguration.ps1'
+
+# hash: {{ include (joinPath .chezmoi.sourceDir "dot_configurations/user-pkgs.winget") | sha256sum }}
+$config = Join-Path "$env:USERPROFILE" '.configurations' 'user-pkgs.winget'
+& $scriptPath -Sudo -YamlConfigFilePath "$config" -ValidateFirst

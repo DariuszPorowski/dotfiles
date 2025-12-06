@@ -1,0 +1,19 @@
+#!/bin/bash
+
+setup_service() {
+  local service_name="$1"
+
+  if ! systemctl --user is-enabled "$service_name" >/dev/null 2>&1; then
+    echo "Enabling and starting the $service_name..."
+    systemctl --user daemon-reload
+    systemctl --user enable "$service_name"
+    systemctl --user start "$service_name"
+  else
+    echo "${service_name} is already enabled. Skipping."
+  fi
+}
+
+{{- if .machine.wsl }}
+~/.local/bin/npiperelay-symlink.sh
+setup_service "ssh-agent-relay.service"
+{{- end }}

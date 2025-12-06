@@ -138,7 +138,7 @@ add_to_shell ~/.zshrc zsh
 add_to_shell ~/.config/fish/config.fish fish
 
 # Verify installation
-"${INSTALL_DIR}/${TOOL_NAME}" version || die "Installed binary failed to run"
+"${INSTALL_DIR}/${TOOL_NAME}" --version || die "Installed binary failed to run"
 
 # Since this script runs in bash, only evaluate fnm env for bash
 log "Setting up environment for current session"

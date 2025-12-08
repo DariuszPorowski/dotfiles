@@ -99,7 +99,7 @@ tasks:
 
   # * PinAct Runner
   _run:pinact:
-    # internal: true
+    internal: true
     desc: Run PinAct
     preconditions:
       - sh: task -g internal:command -- pinact

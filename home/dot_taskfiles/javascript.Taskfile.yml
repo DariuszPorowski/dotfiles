@@ -32,9 +32,9 @@ tasks:
     desc: Run Prettier
     preconditions:
       - sh: task -g internal:command -- prettier
-        msg: "❌ Error: prettier is not installed. Please run 'task js:install:prettier'"
+        msg: "❌ Error: prettier is not installed. Please run 'task -g js:install:prettier'"
       - sh: task -g internal:command:version -- "prettier --version" "{{.VERSION.prettier}}"
-        msg: "❌ Version Mismatch: You are not using {{.VERSION.prettier}} version. Please run 'task js:install:prettier'"
+        msg: "❌ Version Mismatch: You are not using {{.VERSION.prettier}} version. Please run 'task -g js:install:prettier'"
     sources:
       - "**/*.js"
       - "**/*.cjs"
@@ -49,7 +49,7 @@ tasks:
       MODE: '{{default "--check" .MODE}}'
     cmds:
       - defer: |
-          {{if and .EXIT_CODE (eq .MODE "--check")}}echo "⚠️ JavaScript/TypeScript/JSON files are not formatted correctly. Please run 'task js:run:prettier:fix' to fix formatting issues."{{end}}
+          {{if and .EXIT_CODE (eq .MODE "--check")}}echo "⚠️ JavaScript/TypeScript/JSON files are not formatted correctly. Please run 'task -g js:run:prettier:fix' to fix formatting issues."{{end}}
       - prettier --config ~/.linters/.prettierrc.yml {{.MODE}} "./**/*.{js,cjs,mjs,ts,tsx,jsx,json,jsonc}"
     dir: "{{.USER_WORKING_DIR}}"
 

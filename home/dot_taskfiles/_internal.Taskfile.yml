@@ -198,7 +198,7 @@ tasks:
     internal: true
     preconditions:
       - sh: task -g internal:command -- uv
-        msg: uv is not installed. Please install by running 'task runtime:setup:uv'
+        msg: uv is not installed. Please install by running 'task -g runtime:setup:uv'
     requires:
       vars: [APP]
     cmds:

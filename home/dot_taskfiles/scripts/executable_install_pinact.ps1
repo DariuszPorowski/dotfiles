@@ -16,7 +16,7 @@ $ToolName = 'pinact'
 
 function Write-Log {
     param([Parameter(Mandatory)] [string]$Message)
-    Write-Error "-> $Message"
+    Write-Host "-> $Message"
 }
 
 function Die {

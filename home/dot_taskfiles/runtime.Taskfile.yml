@@ -47,10 +47,9 @@ tasks:
       - cmd: |
           sudo ./scripts/setup_pwsh.sh "{{.VERSION.pwsh}}"
         platforms: [linux]
-      # TODO:
-      # - task: :internal:_install:brew
-      #   vars:
-      #     APP: "powershell@{{.VERSION.pwsh}}"
+      - cmd: |
+          ./scripts/setup_pwsh.sh "{{.VERSION.pwsh}}"
+        platforms: [darwin]
       - task: :internal:_install:winget
         vars:
           APP: Microsoft.PowerShell

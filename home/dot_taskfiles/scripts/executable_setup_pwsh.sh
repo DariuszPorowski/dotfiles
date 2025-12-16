@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Constants
 readonly TOOL_NAME="pwsh"
-readonly KEYRING_URL="https://packages.microsoft.com/config/ubuntu"
+readonly KEYRING_URL_BASE="https://packages.microsoft.com/config"
 readonly PACKAGES_DEB="packages-microsoft-prod.deb"
 
 # Configuration (can be overridden by env)
@@ -30,7 +30,7 @@ trap cleanup EXIT INT TERM
 
 usage() {
   cat <<EOF
-Usage: sudo $0 [VERSION]
+Usage: $0 [VERSION]
 
 Positional arguments:
   VERSION           Version to install (default: latest from apt repo)
@@ -38,12 +38,13 @@ Positional arguments:
 Environment variables:
   VERSION           Desired version (default: latest)
 
-Note: This script must be run with sudo or as root to install PowerShell system-wide via apt.
+Notes:
+  - Linux: installs PowerShell from packages.microsoft.com (preferred method in official docs). Must be run with sudo/root.
+  - macOS: installs PowerShell using Homebrew (preferred method in official docs).
 
 Examples:
-  sudo $0              # Install latest
-  sudo $0 7.4.0        # Install specific version
-  VERSION=7.4.0 $0     # Install via env
+  sudo $0              # Linux: install latest
+  $0                   # macOS: install latest
 EOF
 }
 
@@ -64,54 +65,83 @@ if [[ -z "${VERSION//[[:space:]]/}" ]]; then
   VERSION="latest"
 fi
 
+os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+
+if [[ "${os}" == "darwin" ]]; then
+  log "Installing ${TOOL_NAME} (${VERSION}) using Homebrew"
+
+  command -v brew >/dev/null 2>&1 || die "brew is not installed. Install it from https://brew.sh/"
+
+  if [[ "${VERSION}" != "latest" ]]; then
+    log "Note: version pinning isn't supported by this Homebrew installer path; installing latest stable."
+  fi
+
+  brew install --cask powershell || die "Failed to install PowerShell via Homebrew"
+
+  log "✓ Successfully installed ${TOOL_NAME}"
+  pwsh --version >/dev/null 2>&1 || die "Installed binary failed to run"
+  exit 0
+fi
+
+if [[ "${os}" != "linux" ]]; then
+  die "Unsupported OS: ${os}"
+fi
+
 check_sudo
 
-log "Installing ${TOOL_NAME} (${VERSION}) via apt repository"
+if [[ "${VERSION}" != "latest" ]]; then
+  die "This installer uses the Microsoft package repository method and installs the latest available version. For specific versions, use the official direct-download method."
+fi
 
-# Check dependencies
+log "Installing ${TOOL_NAME} (${VERSION}) via Microsoft package repository"
+
 log "Checking dependencies"
-for dep in wget dpkg lsb_release; do
+for dep in apt-get wget dpkg; do
   command -v "${dep}" >/dev/null 2>&1 || die "Missing required dependency: ${dep}"
 done
 
-# Install apt transport dependencies
-log "Installing apt dependencies"
+log "Detecting distribution"
+[[ -f /etc/os-release ]] || die "Missing /etc/os-release"
+# shellcheck disable=SC1091
+source /etc/os-release
+
+case "${ID:-}" in
+  debian)
+    distro="debian"
+    ;;
+  ubuntu)
+    distro="ubuntu"
+    ;;
+  *)
+    die "Unsupported Linux distribution: ${ID:-unknown}"
+    ;;
+esac
+
+[[ -n "${VERSION_ID:-}" ]] || die "Unable to determine VERSION_ID from /etc/os-release"
+
+log "Updating package lists"
 apt-get update || die "Failed to update apt cache"
-apt-get install -y wget apt-transport-https software-properties-common || die "Failed to install apt dependencies"
 
-# Get Ubuntu version
-log "Detecting Ubuntu version"
-VERSION_ID="$(lsb_release -rs)" || die "Failed to detect Ubuntu version"
+log "Installing prerequisites"
+apt-get install -y wget || die "Failed to install prerequisites"
 
-if [[ -z "${VERSION_ID}" ]]; then
-  die "Unable to determine Ubuntu version"
-fi
-
-# Download and register Microsoft repository keys
 log "Setting up Microsoft repository"
 tempFile="${PACKAGES_DEB}"
-if ! wget -q "${KEYRING_URL}/${VERSION_ID}/${PACKAGES_DEB}"; then
-  die "Failed to download Microsoft repository configuration"
+repoUrl="${KEYRING_URL_BASE}/${distro}/${VERSION_ID}/${PACKAGES_DEB}"
+
+if ! wget -q "${repoUrl}"; then
+  die "Failed to download Microsoft repository configuration: ${repoUrl}"
 fi
 
-if ! dpkg -i "${PACKAGES_DEB}"; then
-  die "Failed to register Microsoft repository keys"
-fi
+dpkg -i "${PACKAGES_DEB}" || die "Failed to register Microsoft repository keys"
+rm -f "${PACKAGES_DEB}" || true
+tempFile=""
 
-# Update apt cache after adding repository
-log "Updating apt cache"
+log "Updating package lists (post-repo)"
 apt-get update || die "Failed to update apt cache"
 
-# Install PowerShell
-log "Installing ${TOOL_NAME} ${VERSION}"
-if [[ "${VERSION}" == "latest" ]]; then
-  apt-get install -y powershell || die "Failed to install ${TOOL_NAME}"
-else
-  # Try to install specific version (format: powershell=version)
-  apt-get install -y "powershell=${VERSION}-1.deb" || die "Failed to install ${TOOL_NAME} version ${VERSION}"
-fi
+log "Installing PowerShell"
+apt-get install -y powershell || die "Failed to install ${TOOL_NAME}"
 
 log "✓ Successfully installed ${TOOL_NAME}"
-
-# Verify installation
-"${TOOL_NAME}" -Version || die "Installed binary failed to run"
+"${TOOL_NAME}" -Version >/dev/null 2>&1 || die "Installed binary failed to run"

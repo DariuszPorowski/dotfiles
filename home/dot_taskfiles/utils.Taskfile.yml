@@ -48,8 +48,9 @@ tasks:
         vars:
           APP: jq@{{.VERSION.jq}}
       - cmd: |
-          echo 1 # TODO
+          ./scripts/install_jq.sh "{{.VERSION.jq}}"
         platforms: [linux]
+    dir: "{{.TASKFILE_DIR}}"
 
   # * Install MISE
   install:mise:

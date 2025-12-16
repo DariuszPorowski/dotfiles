@@ -142,4 +142,4 @@ add_to_shell ~/.config/fish/config.fish fish
 
 # Since this script runs in bash, only evaluate fnm env for bash
 log "Setting up environment for current session"
-eval "$(${INSTALL_DIR}/${TOOL_NAME} env --use-on-cd --shell bash)"
+eval "$("${INSTALL_DIR}/${TOOL_NAME}" env --use-on-cd --shell bash)"

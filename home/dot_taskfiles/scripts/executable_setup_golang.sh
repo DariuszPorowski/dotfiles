@@ -21,14 +21,6 @@ die() {
   echo "X Error: $*" >&2
   exit "${2:-1}"
 }
-
-cleanup() {
-  if [[ -n "${tempFile}" && -f "${tempFile}" ]]; then
-    rm -f "${tempFile}"
-  fi
-}
-trap cleanup EXIT INT TERM
-
 # Help message
 usage() {
   cat <<EOF
@@ -49,6 +41,13 @@ Examples:
   VERSION=1.21.0 $0               # Install 1.21.0 via env
 EOF
 }
+
+cleanup() {
+  if [[ -n "${tempFile}" && -f "${tempFile}" ]]; then
+    rm -f "${tempFile}"
+  fi
+}
+trap cleanup EXIT INT TERM
 
 # Show help if requested
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
@@ -158,6 +157,7 @@ else
 
     if [[ -f "${shell_config}" ]]; then
       # Array of environment variables to add
+      # shellcheck disable=SC2016
       local env_vars=(
         "export PATH=\$PATH:${goInstallPath}/bin"
         'export GOPATH=$HOME/go'

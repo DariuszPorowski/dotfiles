@@ -21,14 +21,6 @@ die() {
   echo "X Error: $*" >&2
   exit "${2:-1}"
 }
-
-cleanup() {
-  if [[ -n "${tempDir}" && -d "${tempDir}" ]]; then
-    rm -rf "${tempDir}"
-  fi
-}
-trap cleanup EXIT INT TERM
-
 usage() {
   cat <<EOF
 Usage: $0 [VERSION] [INSTALL_DIR]
@@ -49,17 +41,23 @@ Examples:
 EOF
 }
 
+cleanup() {
+  if [[ -n "${tempDir}" && -d "${tempDir}" ]]; then
+    rm -rf "${tempDir}"
+  fi
+}
+trap cleanup EXIT INT TERM
+
 # Show help if requested
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   usage
   exit 0
 fi
 
-# If VERSION is empty or only whitespace, treat as "latest"
-# Normalize version (add v prefix if missing)
+# Normalize VERSION: empty/whitespace -> "latest", numeric -> add "v" prefix
 if [[ -z "${VERSION//[[:space:]]/}" ]]; then
   VERSION="latest"
-elif [[ "${VERSION}" =~ ^[0-9] ]]; then
+elif [[ "${VERSION}" != "latest" && "${VERSION}" =~ ^[0-9] ]]; then
   VERSION="v${VERSION}"
 fi
 

@@ -23,14 +23,6 @@ die() {
   echo "X Error: $*" >&2
   exit "${2:-1}"
 }
-
-cleanup() {
-  if [[ -n "${tempFile}" && -f "${tempFile}" ]]; then
-    rm -f "${tempFile}"
-  fi
-}
-trap cleanup EXIT INT TERM
-
 # Help message
 usage() {
   cat <<EOF
@@ -50,6 +42,13 @@ Examples:
   VERSION=2.40.0 $0   # Install ia env
 EOF
 }
+
+cleanup() {
+  if [[ -n "${tempFile}" && -f "${tempFile}" ]]; then
+    rm -f "${tempFile}"
+  fi
+}
+trap cleanup EXIT INT TERM
 
 check_sudo() {
   if [[ "${EUID}" -ne 0 ]]; then

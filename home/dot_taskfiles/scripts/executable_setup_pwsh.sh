@@ -20,14 +20,6 @@ die() {
   echo "X Error: $*" >&2
   exit "${2:-1}"
 }
-
-cleanup() {
-  if [[ -n "${tempFile}" && -f "${tempFile}" ]]; then
-    rm -f "${tempFile}"
-  fi
-}
-trap cleanup EXIT INT TERM
-
 usage() {
   cat <<EOF
 Usage: $0 [VERSION]
@@ -47,6 +39,13 @@ Examples:
   $0                   # macOS: install latest
 EOF
 }
+
+cleanup() {
+  if [[ -n "${tempFile}" && -f "${tempFile}" ]]; then
+    rm -f "${tempFile}"
+  fi
+}
+trap cleanup EXIT INT TERM
 
 check_sudo() {
   if [[ "${EUID}" -ne 0 ]]; then

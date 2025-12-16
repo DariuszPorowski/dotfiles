@@ -23,14 +23,6 @@ die() {
   echo "X Error: $*" >&2
   exit "${2:-1}"
 }
-
-cleanup() {
-  if [[ -n "${tempDir}" && -d "${tempDir}" ]]; then
-    rm -rf "${tempDir}"
-  fi
-}
-trap cleanup EXIT INT TERM
-
 # Help message
 usage() {
   cat <<EOF
@@ -52,6 +44,13 @@ Examples:
   VERSION=v1.2.3 $0   # Install 1.2.3 via env
 EOF
 }
+
+cleanup() {
+  if [[ -n "${tempDir}" && -d "${tempDir}" ]]; then
+    rm -rf "${tempDir}"
+  fi
+}
+trap cleanup EXIT INT TERM
 
 # Show help if requested
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then

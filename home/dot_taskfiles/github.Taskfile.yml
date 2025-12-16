@@ -42,7 +42,7 @@ tasks:
     summary: Install a pinned version of Act
     cmds:
       - cmd: |
-          echo TODO
+          {{.PWSH_SCRIPT}} ./scripts/install_pinact.ps1 "{{.VERSION.pinact}}"
         platforms: [windows]
       - task: :internal:_install:brew
         vars:
@@ -57,7 +57,7 @@ tasks:
     desc: Install GHAlint
     cmds:
       - cmd: |
-          echo TODO
+          {{.PWSH_SCRIPT}} ./scripts/install_ghalint.ps1 "{{.VERSION.ghalint}}"
         platforms: [windows]
       - task: :internal:_install:brew
         vars:

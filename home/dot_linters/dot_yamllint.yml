@@ -23,6 +23,13 @@ rules:
   truthy:
     check-keys: false
 
+ignore: |
+  **/.terraform/**
+  **/.venv/**
+  **/venv/**
+  **/.git/**
+  **/node_modules/**
+
 # ignore-from-file:
 #   - .gitignore
 #   - .yamlignore

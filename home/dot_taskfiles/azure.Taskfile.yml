@@ -4,7 +4,7 @@
 version: "3"
 
 vars:
-  VERSION:
+  AZURE_VERSION:
     map:
       az: latest
       azd: latest
@@ -18,12 +18,12 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: Microsoft.AzureCLI
-          VERSION: "{{.VERSION.az}}"
+          VERSION: "{{.AZURE_VERSION.az}}"
       - task: :internal:_install:brew
         vars:
-          APP: azure-cli@{{.VERSION.az}}
+          APP: azure-cli@{{.AZURE_VERSION.az}}
       - cmd: |
-          sudo ./scripts/install_az.sh "{{.VERSION.az}}"
+          sudo ./scripts/install_az.sh "{{.AZURE_VERSION.az}}"
         platforms: [linux]
     dir: "{{.TASKFILE_DIR}}"
 
@@ -35,15 +35,15 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: Microsoft.Azd
-          VERSION: "{{.VERSION.azd}}"
+          VERSION: "{{.AZURE_VERSION.azd}}"
       - task: :internal:_install:brew:tap
         vars:
           APP: azure/azd
       - task: :internal:_install:brew
         vars:
-          APP: azd@{{.VERSION.azd}}
+          APP: azd@{{.AZURE_VERSION.azd}}
       - cmd: |
-          ./scripts/install_azd.sh "{{.VERSION.azd}}"
+          ./scripts/install_azd.sh "{{.AZURE_VERSION.azd}}"
         platforms: [linux]
     dir: "{{.TASKFILE_DIR}}"
 
@@ -54,15 +54,15 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: Microsoft.Bicep
-          VERSION: "{{.VERSION.bicep}}"
+          VERSION: "{{.AZURE_VERSION.bicep}}"
       - task: :internal:_install:brew:tap
         vars:
           APP: azure/bicep
       - task: :internal:_install:brew
         vars:
-          APP: bicep@{{.VERSION.bicep}}
+          APP: bicep@{{.AZURE_VERSION.bicep}}
       - cmd: |
-          ./scripts/install_bicep.sh "{{.VERSION.bicep}}"
+          ./scripts/install_bicep.sh "{{.AZURE_VERSION.bicep}}"
         platforms: [linux]
     dir: "{{.TASKFILE_DIR}}"
 

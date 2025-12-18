@@ -4,7 +4,7 @@
 version: "3"
 
 vars:
-  VERSION:
+  RUNTIME_VERSION:
     map:
       uv: latest
       fnm: latest
@@ -23,60 +23,60 @@ tasks:
     desc: uv setup
     cmds:
       - cmd: |
-          ./scripts/setup_uv.sh "{{.VERSION.uv}}"
+          ./scripts/setup_uv.sh "{{.RUNTIME_VERSION.uv}}"
         platforms: [linux]
       - task: :internal:_install:brew
         vars:
-          APP: uv@{{.VERSION.uv}}
+          APP: uv@{{.RUNTIME_VERSION.uv}}
       - task: :internal:_install:winget
         vars:
           APP: astral-sh.uv
-          VERSION: "{{.VERSION.uv}}"
+          VERSION: "{{.RUNTIME_VERSION.uv}}"
     dir: "{{.TASKFILE_DIR}}"
 
   setup:fnm:
     desc: fnm setup
     cmds:
       - cmd: |
-          ./scripts/setup_fnm.sh "{{.VERSION.fnm}}"
+          ./scripts/setup_fnm.sh "{{.RUNTIME_VERSION.fnm}}"
         platforms: [linux]
       - task: :internal:_install:brew
         vars:
-          APP: fnm@{{.VERSION.fnm}}
+          APP: fnm@{{.RUNTIME_VERSION.fnm}}
       - task: :internal:_install:winget
         vars:
           APP: Schniz.fnm
-          VERSION: "{{.VERSION.fnm}}"
+          VERSION: "{{.RUNTIME_VERSION.fnm}}"
     dir: "{{.TASKFILE_DIR}}"
 
   setup:pwsh:
     desc: pwsh setup
     cmds:
       - cmd: |
-          sudo ./scripts/setup_pwsh.sh "{{.VERSION.pwsh}}"
+          sudo ./scripts/setup_pwsh.sh "{{.RUNTIME_VERSION.pwsh}}"
         platforms: [linux]
       - cmd: |
-          ./scripts/setup_pwsh.sh "{{.VERSION.pwsh}}"
+          ./scripts/setup_pwsh.sh "{{.RUNTIME_VERSION.pwsh}}"
         platforms: [darwin]
       - task: :internal:_install:winget
         vars:
           APP: Microsoft.PowerShell
-          VERSION: "{{.VERSION.pwsh}}"
+          VERSION: "{{.RUNTIME_VERSION.pwsh}}"
     dir: "{{.TASKFILE_DIR}}"
 
   setup:golang:
     desc: golang setup
     cmds:
       - cmd: |
-          ./scripts/setup_golang.sh "{{.VERSION.golang}}"
+          ./scripts/setup_golang.sh "{{.RUNTIME_VERSION.golang}}"
         platforms: [linux]
       - task: :internal:_install:brew
         vars:
-          APP: golang@{{.VERSION.golang}}
+          APP: golang@{{.RUNTIME_VERSION.golang}}
       - task: :internal:_install:winget
         vars:
           APP: GoLang.Go
-          VERSION: "{{.VERSION.golang}}"
+          VERSION: "{{.RUNTIME_VERSION.golang}}"
     dir: "{{.TASKFILE_DIR}}"
 
   # * Setup

@@ -4,7 +4,7 @@
 version: "3"
 
 vars:
-  VERSION:
+  KUBERNETES_VERSION:
     map:
       kubectl: latest
       helm: latest
@@ -21,10 +21,10 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: Kubernetes.kubectl
-          VERSION: "{{.VERSION.kubectl}}"
+          VERSION: "{{.KUBERNETES_VERSION.kubectl}}"
       - task: :internal:_install:brew
         vars:
-          APP: kubernetes-cli@{{.VERSION.kubectl}}
+          APP: kubernetes-cli@{{.KUBERNETES_VERSION.kubectl}}
       - cmd: |
           # TODO
           {{.APT_UPDATE}} && {{.APT_INSTALL}} apt-transport-https ca-certificates curl gnupg
@@ -46,10 +46,10 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: Helm.Helm
-          VERSION: "{{.VERSION.helm}}"
+          VERSION: "{{.KUBERNETES_VERSION.helm}}"
       - task: :internal:_install:brew
         vars:
-          APP: kubernetes-helm@{{.VERSION.helm}}
+          APP: kubernetes-helm@{{.KUBERNETES_VERSION.helm}}
       - cmd: |
           # TODO
           {{.APT_UPDATE}} && {{.APT_INSTALL}} curl gpg apt-transport-https
@@ -65,16 +65,16 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: Kubernetes.kind
-          VERSION: "{{.VERSION.kind}}"
+          VERSION: "{{.KUBERNETES_VERSION.kind}}"
       - task: :internal:_install:brew
         vars:
-          APP: kind@{{.VERSION.kind}}
+          APP: kind@{{.KUBERNETES_VERSION.kind}}
       - cmd: |
           # TODO
           # For AMD64 / x86_64
-          [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/{{.VERSION.kind}}/kind-linux-amd64
+          [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/{{.KUBERNETES_VERSION.kind}}/kind-linux-amd64
           # For ARM64
-          [ $(uname -m) = aarch64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/{{.VERSION.kind}}/kind-linux-arm64
+          [ $(uname -m) = aarch64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/{{.KUBERNETES_VERSION.kind}}/kind-linux-arm64
           chmod +x kind
           mkdir -p ~/.local/bin
           mv ./kind ~/.local/bin/kind
@@ -87,13 +87,13 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: k3d.k3d
-          VERSION: "{{.VERSION.k3d}}"
+          VERSION: "{{.KUBERNETES_VERSION.k3d}}"
       - task: :internal:_install:brew
         vars:
-          APP: k3d@{{.VERSION.k3d}}
+          APP: k3d@{{.KUBERNETES_VERSION.k3d}}
       - cmd: |
           # TODO
-          curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | {{if ne .VERSION.k3d "latest"}}TAG="{{.VERSION.k3d}}" {{end}}bash
+          curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | {{if ne .KUBERNETES_VERSION.k3d "latest"}}TAG="{{.KUBERNETES_VERSION.k3d}}" {{end}}bash
         platforms: [linux]
 
   # * Install EnvTest Manager
@@ -102,7 +102,7 @@ tasks:
     cmds:
       - task: :internal:_install:go
         vars:
-          APP: sigs.k8s.io/controller-runtime/tools/setup-envtest@{{.VERSION.envtest}}
+          APP: sigs.k8s.io/controller-runtime/tools/setup-envtest@{{.KUBERNETES_VERSION.envtest}}
 
   # * Install Stern
   install:stern:
@@ -111,14 +111,14 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: stern.stern
-          VERSION: "{{.VERSION.stern}}"
+          VERSION: "{{.KUBERNETES_VERSION.stern}}"
       - task: :internal:_install:brew
         vars:
-          APP: stern@{{.VERSION.stern}}
+          APP: stern@{{.KUBERNETES_VERSION.stern}}
       - cmd: |
           # TODO
           asdf plugin add stern
-          asdf install stern "{{.VERSION.stern}}"
+          asdf install stern "{{.KUBERNETES_VERSION.stern}}"
         platforms: [linux]
 
   # * Tools

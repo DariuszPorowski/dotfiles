@@ -4,7 +4,7 @@
 version: "3"
 
 vars:
-  VERSION:
+  TERRAFORM_VERSION:
     map:
       terraform: latest
       opentofu: latest
@@ -17,15 +17,15 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: HashiCorp.Terraform
-          VERSION: "{{.VERSION.terraform}}"
+          VERSION: "{{.TERRAFORM_VERSION.terraform}}"
       - task: :internal:_install:brew:tap
         vars:
           APP: hashicorp/tap
       - task: :internal:_install:brew
         vars:
-          APP: hashicorp/tap/terraform@{{.VERSION.terraform}}
+          APP: hashicorp/tap/terraform@{{.TERRAFORM_VERSION.terraform}}
       - cmd: |
-          sudo ./scripts/install_terraform.sh "{{.VERSION.terraform}}"
+          sudo ./scripts/install_terraform.sh "{{.TERRAFORM_VERSION.terraform}}"
         platforms: [linux]
     dir: "{{.TASKFILE_DIR}}"
 
@@ -36,12 +36,12 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: OpenTofu.Tofu
-          VERSION: "{{.VERSION.opentofu}}"
+          VERSION: "{{.TERRAFORM_VERSION.opentofu}}"
       - task: :internal:_install:brew
         vars:
-          APP: opentofu@{{.VERSION.opentofu}}
+          APP: opentofu@{{.TERRAFORM_VERSION.opentofu}}
       - cmd: |
-          ./scripts/install_opentofu.sh "{{.VERSION.opentofu}}"
+          ./scripts/install_opentofu.sh "{{.TERRAFORM_VERSION.opentofu}}"
         platforms: [linux]
     dir: "{{.TASKFILE_DIR}}"
 

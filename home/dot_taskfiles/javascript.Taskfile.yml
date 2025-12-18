@@ -4,7 +4,7 @@
 version: "3"
 
 vars:
-  VERSION:
+  JAVASCRIPT_VERSION:
     map:
       prettier: latest
 
@@ -15,7 +15,7 @@ tasks:
     cmds:
       - task: :internal:_install:npm
         vars:
-          APP: prettier@{{.VERSION.prettier}}
+          APP: prettier@{{.JAVASCRIPT_VERSION.prettier}}
       - task: :internal:_install:npm
         vars:
           APP: prettier-plugin-multiline-arrays
@@ -38,8 +38,8 @@ tasks:
     preconditions:
       - sh: task -g internal:command -- prettier
         msg: "❌ Error: prettier is not installed. Please run 'task -g js:install:prettier'"
-      - sh: task -g internal:command:version -- "prettier --version" "{{.VERSION.prettier}}"
-        msg: "❌ Version Mismatch: You are not using {{.VERSION.prettier}} version. Please run 'task -g js:install:prettier'"
+      - sh: task -g internal:command:version -- "prettier --version" "{{.JAVASCRIPT_VERSION.prettier}}"
+        msg: "❌ Version Mismatch: You are not using {{.JAVASCRIPT_VERSION.prettier}} version. Please run 'task -g js:install:prettier'"
     sources:
       - "**/*.js"
       - "**/*.cjs"

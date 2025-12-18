@@ -4,7 +4,7 @@
 version: "3"
 
 vars:
-  VERSION:
+  API_VERSION:
     map:
       autorest: latest
       oav: latest
@@ -17,7 +17,7 @@ tasks:
     cmds:
       - task: :internal:_install:npm
         vars:
-          APP: autorest@{{.VERSION.autorest}}
+          APP: autorest@{{.API_VERSION.autorest}}
 
   # * Install OAV
   install:oav:
@@ -25,7 +25,7 @@ tasks:
     cmds:
       - task: :internal:_install:npm
         vars:
-          APP: oav@{{.VERSION.oav}}
+          APP: oav@{{.API_VERSION.oav}}
 
   # * Install TypeSpec
   install:typespec:
@@ -33,7 +33,7 @@ tasks:
     cmds:
       - task: :internal:_install:npm
         vars:
-          APP: "@typespec/compiler@{{.VERSION.typespec}}"
+          APP: "@typespec/compiler@{{.API_VERSION.typespec}}"
 
   # * Tools
   tools:
@@ -53,8 +53,8 @@ tasks:
     preconditions:
       - sh: task -g internal:command -- tsp
         msg: "❌ Error: tsp is not installed. Please run 'task -g api:install:typespec'"
-      - sh: task -g internal:command:version -- "tsp --version" "{{.VERSION.typespec}}"
-        msg: "❌ Version Mismatch: You are not using {{.VERSION.typespec}} version. Please run 'task -g api:install:typespec'"
+      - sh: task -g internal:command:version -- "tsp --version" "{{.API_VERSION.typespec}}"
+        msg: "❌ Version Mismatch: You are not using {{.API_VERSION.typespec}} version. Please run 'task -g api:install:typespec'"
     sources:
       - "**/*.tsp"
     cmds:

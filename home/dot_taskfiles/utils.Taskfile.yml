@@ -4,7 +4,7 @@
 version: "3"
 
 vars:
-  VERSION:
+  UTILS_VERSION:
     map:
       dapr: latest
       oras: latest
@@ -19,12 +19,12 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: Dapr.CLI
-          VERSION: "{{.VERSION.dapr}}"
+          VERSION: "{{.UTILS_VERSION.dapr}}"
       - task: :internal:_install:brew
         vars:
-          APP: dapr/tap/dapr-cli@{{.VERSION.dapr}}
+          APP: dapr/tap/dapr-cli@{{.UTILS_VERSION.dapr}}
       - cmd: |
-          ./scripts/install_dapr.sh "{{.VERSION.dapr}}"
+          ./scripts/install_dapr.sh "{{.UTILS_VERSION.dapr}}"
         platforms: [linux]
     dir: "{{.TASKFILE_DIR}}"
 
@@ -35,12 +35,12 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: ORASProject.ORAS
-          VERSION: "{{.VERSION.oras}}"
+          VERSION: "{{.UTILS_VERSION.oras}}"
       - task: :internal:_install:brew
         vars:
-          APP: oras@{{.VERSION.oras}}
+          APP: oras@{{.UTILS_VERSION.oras}}
       - cmd: |
-          ./scripts/install_oras.sh "{{.VERSION.oras}}"
+          ./scripts/install_oras.sh "{{.UTILS_VERSION.oras}}"
         platforms: [linux]
     dir: "{{.TASKFILE_DIR}}"
 
@@ -51,12 +51,12 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: jqlang.jq
-          VERSION: "{{.VERSION.jq}}"
+          VERSION: "{{.UTILS_VERSION.jq}}"
       - task: :internal:_install:brew
         vars:
-          APP: jq@{{.VERSION.jq}}
+          APP: jq@{{.UTILS_VERSION.jq}}
       - cmd: |
-          ./scripts/install_jq.sh "{{.VERSION.jq}}"
+          ./scripts/install_jq.sh "{{.UTILS_VERSION.jq}}"
         platforms: [linux]
     dir: "{{.TASKFILE_DIR}}"
 
@@ -67,12 +67,12 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: jdx.mise
-          VERSION: "{{.VERSION.mise}}"
+          VERSION: "{{.UTILS_VERSION.mise}}"
       - task: :internal:_install:brew
         vars:
-          APP: mise@{{.VERSION.mise}}
+          APP: mise@{{.UTILS_VERSION.mise}}
       - cmd: |
-          ./scripts/install_mise.sh "{{.VERSION.mise}}"
+          ./scripts/install_mise.sh "{{.UTILS_VERSION.mise}}"
         platforms: [linux]
     dir: "{{.TASKFILE_DIR}}"
 

@@ -4,7 +4,7 @@
 version: "3"
 
 vars:
-  VERSION:
+  YAML_VERSION:
     map:
       yamllint: latest
 
@@ -15,7 +15,7 @@ tasks:
     cmds:
       - task: :internal:_install:uv
         vars:
-          APP: yamllint@{{.VERSION.yamllint}}
+          APP: yamllint@{{.YAML_VERSION.yamllint}}
 
   # * Tools
   tools:
@@ -33,8 +33,8 @@ tasks:
     preconditions:
       - sh: task -g internal:command -- yamllint
         msg: "❌ Error: yamllint is not installed. Please run 'task -g yml:install:yamllint'"
-      - sh: task -g internal:command:version -- "yamllint --version" "{{.VERSION.yamllint}}"
-        msg: "❌ Version Mismatch: You are not using {{.VERSION.yamllint}} version. Please run 'task -g yml:install:yamllint'"
+      - sh: task -g internal:command:version -- "yamllint --version" "{{.YAML_VERSION.yamllint}}"
+        msg: "❌ Version Mismatch: You are not using {{.YAML_VERSION.yamllint}} version. Please run 'task -g yml:install:yamllint'"
     sources:
       - "**/*.yml"
       - "**/*.yaml"

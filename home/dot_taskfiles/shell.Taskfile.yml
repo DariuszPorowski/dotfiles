@@ -4,7 +4,7 @@
 version: "3"
 
 vars:
-  VERSION:
+  SHELL_VERSION:
     map:
       shellcheck: latest
       shfmt: latest
@@ -17,12 +17,12 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: koalaman.shellcheck
-          VERSION: "{{.VERSION.shellcheck}}"
+          VERSION: "{{.SHELL_VERSION.shellcheck}}"
       - task: :internal:_install:brew
         vars:
-          APP: shellcheck@{{.VERSION.shellcheck}}
+          APP: shellcheck@{{.SHELL_VERSION.shellcheck}}
       - cmd: |
-          ./scripts/install_shellcheck.sh "{{.VERSION.shellcheck}}"
+          ./scripts/install_shellcheck.sh "{{.SHELL_VERSION.shellcheck}}"
         platforms: [linux]
     dir: "{{.TASKFILE_DIR}}"
 
@@ -33,9 +33,9 @@ tasks:
       - task: :internal:_install:winget
         vars:
           APP: mvdan.shfmt
-          VERSION: "{{.VERSION.shfmt}}"
+          VERSION: "{{.SHELL_VERSION.shfmt}}"
       - cmd: |
-          ./scripts/install_shfmt.sh "{{.VERSION.shfmt}}"
+          ./scripts/install_shfmt.sh "{{.SHELL_VERSION.shfmt}}"
         platforms: [linux, darwin]
     dir: "{{.TASKFILE_DIR}}"
 
@@ -56,8 +56,8 @@ tasks:
     preconditions:
       - sh: task -g internal:command -- shfmt
         msg: "❌ Error: shfmt is not installed. Please run 'task -g sh:install:shfmt"
-      - sh: task -g internal:command:version -- "shfmt --version" "{{.VERSION.shfmt}}"
-        msg: "❌ Version Mismatch: You are not using {{.VERSION.shfmt}} version. Please run 'task -g sh:install:shfmt'"
+      - sh: task -g internal:command:version -- "shfmt --version" "{{.SHELL_VERSION.shfmt}}"
+        msg: "❌ Version Mismatch: You are not using {{.SHELL_VERSION.shfmt}} version. Please run 'task -g sh:install:shfmt'"
     vars:
       SHELL_FILES:
         sh: |
@@ -77,8 +77,8 @@ tasks:
     preconditions:
       - sh: task -g internal:command -- shellcheck
         msg: "❌ Error: shellcheck is not installed. Please run 'task -g sh:install:shellcheck'"
-      - sh: task -g internal:command:version -- "shellcheck --version" "{{.VERSION.shellcheck}}"
-        msg: "❌ Version Mismatch: You are not using {{.VERSION.shellcheck}} version. Please run 'task -g sh:install:shellcheck'"
+      - sh: task -g internal:command:version -- "shellcheck --version" "{{.SHELL_VERSION.shellcheck}}"
+        msg: "❌ Version Mismatch: You are not using {{.SHELL_VERSION.shellcheck}} version. Please run 'task -g sh:install:shellcheck'"
     vars:
       ITEMS:
         sh: |

@@ -3,6 +3,11 @@
 ---
 version: "3"
 
+vars:
+  VERSION:
+    map:
+      prettier: latest
+
 tasks:
   # * Install Prettier
   install:prettier:

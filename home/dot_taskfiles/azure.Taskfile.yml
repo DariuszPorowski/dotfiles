@@ -3,6 +3,13 @@
 ---
 version: "3"
 
+vars:
+  VERSION:
+    map:
+      az: latest
+      azd: latest
+      bicep: latest
+
 tasks:
   # * Install Azure CLI
   install:az:

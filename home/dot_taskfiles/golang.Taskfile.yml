@@ -3,6 +3,21 @@
 ---
 version: "3"
 
+vars:
+  VERSION:
+    map:
+      dlv: latest
+      deadcode: latest
+      golangciLint: latest
+      gotestsum: latest
+      govulncheck: latest
+      goimports: latest
+      gofumpt: latest
+      goTestCoverage: latest
+      gocoverCobertura: latest
+      mockgen: latest
+      controllerGen: latest
+
 tasks:
   # * Install Dlv
   install:dlv:

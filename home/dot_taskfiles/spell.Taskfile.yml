@@ -3,6 +3,13 @@
 ---
 version: "3"
 
+vars:
+  VERSION:
+    map:
+      cspell: latest
+      codespell: latest
+      lychee: latest
+
 tasks:
   # * Install CSpell
   install:cspell:

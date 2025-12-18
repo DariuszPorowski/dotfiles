@@ -3,6 +3,13 @@
 ---
 version: "3"
 
+vars:
+  VERSION:
+    map:
+      autorest: latest
+      oav: latest
+      typespec: latest
+
 tasks:
   # * Install Autorest
   install:autorest:

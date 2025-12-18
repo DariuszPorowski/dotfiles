@@ -3,6 +3,11 @@
 ---
 version: "3"
 
+vars:
+  VERSION:
+    map:
+      yamllint: latest
+
 tasks:
   # * Install YAMLlint
   install:yamllint:

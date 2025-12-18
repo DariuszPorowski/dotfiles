@@ -14,66 +14,6 @@ vars:
   NODE_VERSION:
     sh: |
       [ -f .node-version ] && cat .node-version || echo "24"
-  VERSION:
-    map:
-      # Runtime
-      uv: latest
-      fnm: latest
-      pwsh: latest
-      golang: latest
-      # API
-      autorest: latest
-      oav: latest
-      typespec: latest
-      # GitHub
-      actionlint: latest
-      act: latest
-      pinact: latest
-      ghalint: latest
-      gh: latest
-      # GoLang
-      dlv: latest
-      deadcode: latest
-      golangciLint: latest
-      gotestsum: latest
-      govulncheck: latest
-      goimports: latest
-      gofumpt: latest
-      goTestCoverage: latest
-      gocoverCobertura: latest
-      mockgen: latest
-      controllerGen: latest
-      # JavaScript/TypeScript
-      prettier: latest
-      # Kubernetes
-      kubectl: latest
-      helm: latest
-      kind: latest
-      k3d: latest
-      envtest: latest
-      # Markdown
-      markdownlintCli2: latest
-      markdownTableFormatter: latest
-      # Shell
-      shellcheck: latest
-      shfmt: latest
-      # Spell
-      cspell: latest
-      codespell: latest
-      lychee: latest
-      # Utils
-      dapr: latest
-      oras: latest
-      jq: latest
-      terraform: latest
-      opentofu: latest
-      bicep: latest
-      azd: latest
-      az: latest
-      mise: latest
-      stern: latest
-      # YAML
-      yamllint: latest
 
 env:
   DEBIAN_FRONTEND: noninteractive

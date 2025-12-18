@@ -3,6 +3,12 @@
 ---
 version: "3"
 
+vars:
+  VERSION:
+    map:
+      terraform: latest
+      opentofu: latest
+
 tasks:
   # * Install Terraform
   install:terraform:

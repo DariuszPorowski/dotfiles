@@ -3,6 +3,16 @@
 ---
 version: "3"
 
+vars:
+  VERSION:
+    map:
+      kubectl: latest
+      helm: latest
+      kind: latest
+      k3d: latest
+      envtest: latest
+      stern: latest
+
 tasks:
   # * Install Kubectl
   install:kubectl:

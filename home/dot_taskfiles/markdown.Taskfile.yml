@@ -3,6 +3,12 @@
 ---
 version: "3"
 
+vars:
+  VERSION:
+    map:
+      markdownlintCli2: latest
+      markdownTableFormatter: latest
+
 tasks:
   # * Install markdownlint-cli2
   install:markdownlint-cli2:

@@ -3,6 +3,14 @@
 ---
 version: "3"
 
+vars:
+  VERSION:
+    map:
+      dapr: latest
+      oras: latest
+      jq: latest
+      mise: latest
+
 tasks:
   # * Install Dapr
   install:dapr:

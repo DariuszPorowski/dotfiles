@@ -68,6 +68,18 @@ if command -v oh-my-posh >/dev/null 2>&1; then
   fi
 fi
 
+if command -v mise >/dev/null 2>&1; then
+  _shell="$(_detect_shell)"
+  if [ "$_shell" = "fish" ]; then
+    mise activate fish | source
+  else
+    eval "$(mise activate "$_shell")"
+  fi
+  unset
+
+  eval "$(mise completion "$(_detect_shell)")"
+fi
+
 if command -v chezmoi >/dev/null 2>&1; then
   eval "$(chezmoi completion "$(_detect_shell)")"
 fi

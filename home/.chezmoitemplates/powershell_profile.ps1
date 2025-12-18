@@ -81,6 +81,11 @@ if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
     }
 }
 
+# Initialize mise if installed
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+    (&mise activate pwsh) | Out-String | Invoke-Expression
+}
+
 # Initialize FNM if installed
 if (Get-Command fnm -ErrorAction SilentlyContinue) {
     fnm env --shell powershell --use-on-cd --version-file-strategy=recursive | Out-String | Invoke-Expression

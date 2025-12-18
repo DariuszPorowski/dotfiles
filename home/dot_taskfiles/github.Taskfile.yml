@@ -97,9 +97,19 @@ tasks:
     desc: Install GitHub tools
     vars:
       ITEMS:
-        - actionlint
         - act
         - gh
+    cmds:
+      - for: { var: ITEMS }
+        task: install:{{.ITEM}}
+      - task: tools:lint
+
+  # * Tools (lint)
+  tools:lint:
+    desc: Install GitHub tools (lint)
+    vars:
+      ITEMS:
+        - actionlint
         - pinact
         - ghalint
     cmds:
@@ -184,6 +194,6 @@ tasks:
   lint:
     desc: Lint YAML files
     cmds:
-      - task: run:pinact:fix
-      - task: run:actionlint
       - task: run:ghalint
+      - task: run:actionlint
+      - task: run:pinact:fix

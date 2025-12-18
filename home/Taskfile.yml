@@ -44,6 +44,7 @@ includes:
   # project: .taskfiles/project.Taskfile.yml
   k8s: .taskfiles/kubernetes.Taskfile.yml
   utils: .taskfiles/utils.Taskfile.yml
+
 tasks:
   default:
     desc: List available tasks
@@ -61,8 +62,6 @@ tasks:
       - 'echo "Architecture: {{ARCH}}"' # amd64, arm64, etc.
       # yamllint disable-line rule:quoted-strings
       - 'echo "CPU cores: {{numCPU}}"' # Number of CPU cores
-      # yamllint disable-line rule:quoted-strings
-      - cmd: 'echo -e "Tool versions:\n" && echo "{{.VERSION | toYaml}}"'
 
   init:
     desc: List available tasks

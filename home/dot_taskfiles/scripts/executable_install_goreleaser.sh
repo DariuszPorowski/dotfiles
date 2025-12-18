@@ -3,9 +3,9 @@
 set -euo pipefail
 
 # Constants
-readonly GITHUB_OWNER="suzuki-shunsuke"
-readonly GITHUB_REPO="pinact"
-readonly TOOL_NAME="pinact"
+readonly GITHUB_OWNER="goreleaser"
+readonly GITHUB_REPO="goreleaser"
+readonly TOOL_NAME="goreleaser"
 
 # Configuration (can be overridden by env)
 VERSION="${1:-${VERSION:-latest}}"
@@ -13,14 +13,18 @@ INSTALL_DIR="${2:-${INSTALL_DIR:-}}"
 
 tempDir=""
 
+# Logging helper
 log() {
   echo "-> $*" >&2
 }
 
+# Error handling helper
 die() {
   echo "X Error: $*" >&2
   exit "${2:-1}"
 }
+
+# Help message
 usage() {
   cat <<EOF
 Usage: $0 [VERSION] [INSTALL_DIR]
@@ -35,9 +39,10 @@ Environment variables:
   GITHUB_TOKEN      GitHub token for API authentication
 
 Examples:
-  $0                      # Install latest
-  $0 1.2.3                # Install 1.2.3
-  $0 1.2.3 ~/.local/bin   # Install 1.2.3 to ~/.local/bin
+  $0                       # Install latest
+  $0 2.13.1                # Install 2.13.1
+  $0 2.13.1 ~/.local/bin   # Install 2.13.1 to ~/.local/bin
+  VERSION=v2.13.1 $0       # Install 2.13.1 via env
 EOF
 }
 
@@ -80,17 +85,25 @@ if [[ ! -d "${INSTALL_DIR}" ]]; then
   mkdir -p "${INSTALL_DIR}" || die "Cannot create install directory ${INSTALL_DIR}"
 fi
 
+# Detect OS
+osRaw="$(uname -s)"
+case "${osRaw}" in
+  Linux) os="Linux" ;;
+  Darwin) os="Darwin" ;;
+  *) die "Unsupported operating system: ${osRaw}" ;;
+esac
+
 # Detect architecture
 archRaw="$(uname -m)"
 case "${archRaw}" in
-  x86_64 | amd64) arch="amd64" ;;
+  x86_64 | amd64) arch="x86_64" ;;
   arm64 | aarch64) arch="arm64" ;;
-  # armv7l | armv6l) arch="arm" ;;
-  # i386 | i686) arch="386" ;;
+  armv7l | armv6l) arch="armv7" ;;
+  i386 | i686) arch="i386" ;;
   *) die "Unsupported architecture: ${archRaw}" ;;
 esac
 
-log "Installing ${TOOL_NAME} (${VERSION}) to ${INSTALL_DIR}"
+log "Installing ${TOOL_NAME} (${VERSION}) for ${os}/${arch} to ${INSTALL_DIR}"
 
 # GitHub API authentication
 ghAuthHeader=(-H "Accept: application/vnd.github+json")
@@ -114,12 +127,12 @@ if ! curl "${ghAuthHeader[@]}" -fsSL --proto '=https' --tlsv1.3 "${apiUrl}" -o "
   die "Failed to fetch release information. Check version or network connection."
 fi
 
-# Extract download URL
-downloadUrl="$(jq -r --arg arch "${arch}" \
-  '.assets[] | select(.browser_download_url | endswith("_linux_\($arch).tar.gz")) | .browser_download_url' \
+# Extract download URL (pattern: goreleaser_<OS>_<arch>.tar.gz)
+downloadUrl="$(jq -r --arg os "${os}" --arg arch "${arch}" \
+  '.assets[] | select(.browser_download_url | test("goreleaser_\($os)_\($arch)\\.tar\\.gz$")) | .browser_download_url' \
   "${releaseJson}")"
 
-[[ -n "${downloadUrl}" ]] || die "No asset found for architecture ${arch}"
+[[ -n "${downloadUrl}" ]] || die "No asset found for ${os}/${arch}"
 
 log "Downloading ${downloadUrl}"
 archivePath="${tempDir}/${TOOL_NAME}.tar.gz"
@@ -132,8 +145,14 @@ tar -xf "${archivePath}" -C "${tempDir}" "${TOOL_NAME}" || die "Extraction faile
 
 # Install binary
 log "Installing binary"
-mv "${tempDir}/${TOOL_NAME}" "${INSTALL_DIR}/${TOOL_NAME}" || die "Failed to install binary"
-chmod 0755 "${INSTALL_DIR}/${TOOL_NAME}" || die "Failed to set permissions"
+if [[ "${os}" == "Darwin" ]]; then
+  # macOS install command may not support -D flag in all versions
+  mkdir -p "${INSTALL_DIR}" || die "Failed to create install directory"
+  install -m 0755 "${tempDir}/${TOOL_NAME}" "${INSTALL_DIR}/${TOOL_NAME}" || die "Failed to install binary"
+else
+  # Linux install with -D flag
+  install -Dm0755 "${tempDir}/${TOOL_NAME}" "${INSTALL_DIR}/${TOOL_NAME}" || die "Failed to install binary"
+fi
 
 log "✓ Successfully installed ${TOOL_NAME} to ${INSTALL_DIR}/${TOOL_NAME}"
 

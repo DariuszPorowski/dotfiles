@@ -61,7 +61,7 @@ scheme = ["https", "http", "file"]
 require_https = false
 
 # Custom request headers
-headers = ['Accept-Encoding: deflate, compress, gzip, br, zstd']
+header = { "Accept-Encoding" = "deflate, compress, gzip, br, zstd" }
 
 #############################  Exclusions  ##########################
 

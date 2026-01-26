@@ -1,6 +1,6 @@
 # Dotfiles
 
-Uses [chezmoi](https://www.chezmoi.io/) as the dotfile manager.
+Uses [chezmoi](https://www.chezmoi.io/) as the dotfiles manager.
 
 ## AGE key
 

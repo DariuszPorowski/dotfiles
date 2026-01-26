@@ -4,6 +4,9 @@ set -eu
 
 BIN_DIR="${HOME}/.local/bin"
 
+# Ensure the bin directory exists
+mkdir -p "${BIN_DIR}"
+
 install_if_missing() {
   local name="$1"
   local install_url="$2"

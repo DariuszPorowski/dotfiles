@@ -2,37 +2,37 @@
 
 set -eu
 
+BIN_DIR="${HOME}/.local/bin"
+
+install_if_missing() {
+  local name="$1"
+  local install_url="$2"
+  
+  if ! command -v "$name" >/dev/null 2>&1; then
+    echo "Installing $name to '${BIN_DIR}'" >&2
+    curl -fsSL "$install_url" | bash -s -- -d "${BIN_DIR}"
+  fi
+}
+
+# Install chezmoi
 if ! chezmoi="$(command -v chezmoi)"; then
-  bin_dir="${HOME}/.local/bin"
-  chezmoi="${bin_dir}/chezmoi"
+  chezmoi="${BIN_DIR}/chezmoi"
   echo "Installing chezmoi to '${chezmoi}'" >&2
   if command -v curl >/dev/null; then
-    chezmoi_install_script="$(curl -fsSL get.chezmoi.io)"
+    sh -c "$(curl -fsSL get.chezmoi.io)" -- -b "${BIN_DIR}"
   elif command -v wget >/dev/null; then
-    chezmoi_install_script="$(wget -qO- get.chezmoi.io)"
+    sh -c "$(wget -qO- get.chezmoi.io)" -- -b "${BIN_DIR}"
   else
-    echo "To install chezmoi, you must have curl or wget installed." >&2
+    echo "Error: curl or wget required" >&2
     exit 1
   fi
-  sh -c "${chezmoi_install_script}" -- -b "${bin_dir}"
-  unset chezmoi_install_script bin_dir
 fi
 
-if ! command -v oh-my-posh >/dev/null 2>&1; then
-  echo "Installing oh-my-posh" >&2
-  curl -fsSL https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
-fi
+# Install other tools
+install_if_missing "oh-my-posh" "https://ohmyposh.dev/install.sh"
+install_if_missing "aliae" "https://aliae.dev/install.sh"
 
-if ! command -v aliae >/dev/null 2>&1; then
-  echo "Installing aliae" >&2
-  curl -fsSL https://aliae.dev/install.sh | bash -s -- -d ~/.local/bin
-fi
-
-# POSIX way to get script's dir: https://stackoverflow.com/a/29834779/12156188
+# Apply chezmoi configuration
 script_dir="$(cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P)"
-
-set -- init --apply --source="${script_dir}"
-
-echo "Running 'chezmoi $*'" >&2
-# exec: replace current process with chezmoi
-exec "$chezmoi" "$@"
+echo "Running 'chezmoi init --apply --source=${script_dir}'" >&2
+exec "$chezmoi" init --apply --source="${script_dir}"

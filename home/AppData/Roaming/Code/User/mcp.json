@@ -10,14 +10,31 @@
   "servers": {
     "github": {
       "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/"
+      "url": "https://api.githubcopilot.com/mcp/",
+      "tools": [
+        "*"
+      ]
     },
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp",
       "headers": {
         "CONTEXT7_API_KEY": "${input:CONTEXT7_API_KEY}"
-      }
+      },
+      "tools": [
+        "*"
+      ]
+    },
+    "workiq": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@microsoft/workiq",
+        "mcp"
+      ],
+      "tools": [
+        "*"
+      ]
     }
   }
 }

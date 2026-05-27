@@ -35,7 +35,10 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$Username = $env:USERNAME
+    [string]$Username = $env:USERNAME,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$Sparse
 )
 
 # Set strict error handling
@@ -200,6 +203,29 @@ try {
 }
 catch {
     throw "Failed to install WSL instance: $_"
+}
+#endregion
+
+#region Sparse VHD
+# Optionally enable sparse VHD support to reclaim disk space on the host.
+# Note: As of recent WSL versions, sparse VHD support is disabled by default
+# due to potential data corruption and must be force-enabled via --allow-unsafe.
+if ($Sparse) {
+    Write-LogInfo "Enabling sparse VHD support for '$Name' (unsafe)..."
+    Write-LogWarning "Sparse VHD support is disabled by default due to potential data corruption risks."
+
+    try {
+        wsl.exe --manage "$Name" --set-sparse true --allow-unsafe
+
+        if ($LASTEXITCODE -ne 0) {
+            throw "wsl --manage --set-sparse failed with exit code: $LASTEXITCODE"
+        }
+
+        Write-LogOK "Sparse VHD enabled for '$Name'."
+    }
+    catch {
+        Write-Warning "Failed to enable sparse VHD for '$Name': $_"
+    }
 }
 #endregion
 

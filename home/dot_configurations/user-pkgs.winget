@@ -219,6 +219,33 @@ properties:
         source: winget
         id: PuTTY.PuTTY
 
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Microsoft.PowerToys
+      directives:
+        description: PowerToys
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Microsoft.PowerToys
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Microsoft.Coreutils
+      directives:
+        description: Core Utils
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Microsoft.Coreutils
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Brave.Brave
+      directives:
+        description: Brave
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Brave.Brave
+
     # - resource: Microsoft.WinGet.DSC/WinGetPackage
     #   id: Microsoft.VisualStudioCode
     #   directives:

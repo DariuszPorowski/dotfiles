@@ -178,6 +178,7 @@ properties:
       directives:
         description: Core Utils
         allowPrerelease: true
+        securityContext: elevated
       settings:
         source: winget
         id: Microsoft.Coreutils

@@ -81,7 +81,7 @@ sudo -u $USER sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin init Dariu
 Install chezmoi in an elevated shell.
 
 ```pwsh
-winget install twpayne.chezmoi
+winget install --id twpayne.chezmoi
 ```
 
 Init

@@ -43,13 +43,12 @@ if ($Sudo) {
 
         try {
             $elevated = Start-Process -FilePath $currentProcess.Path -Verb RunAs -ArgumentList $argumentList -Wait -PassThru
+            Exit $elevated.ExitCode
         }
         catch {
-            Write-Error "Administrator elevation was canceled or failed. Re-run and accept the UAC prompt to apply the WinGet configuration. ($($_.Exception.Message))"
-            Exit 1
+            Write-Warning "Administrator elevation was canceled or unavailable ($($_.Exception.Message))."
+            Write-Warning 'Continuing without pre-elevation; WinGet will request elevation per package as needed (securityContext: elevated).'
         }
-
-        Exit $elevated.ExitCode
     }
 }
 

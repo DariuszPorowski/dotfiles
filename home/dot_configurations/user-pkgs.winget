@@ -211,15 +211,6 @@ properties:
         id: mvdan.shfmt
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: PuTTY.PuTTY
-      directives:
-        description: PuTTY
-        allowPrerelease: true
-      settings:
-        source: winget
-        id: PuTTY.PuTTY
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: Microsoft.PowerToys
       directives:
         description: PowerToys

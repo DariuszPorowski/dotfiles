@@ -172,3 +172,13 @@ properties:
       settings:
         source: winget
         id: FireDaemon.OpenSSL
+
+    # TODO: Check if these can be installed without elevation, and if so, move to user scope
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: PuTTY.PuTTY
+      directives:
+        description: PuTTY
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: PuTTY.PuTTY

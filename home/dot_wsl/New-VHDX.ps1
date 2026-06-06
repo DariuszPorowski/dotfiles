@@ -19,5 +19,5 @@ if (-not $env:WSL_WORKSPACES_VHDX_FILE) {
 # if file does not exist
 if (-not (Test-Path -LiteralPath $WSL_WORKSPACES_VHDX_FILE)) {
     Write-Host "Creating new VHDX file at $WSL_WORKSPACES_VHDX_FILE..."
-    $vhdx = New-VHD -Path "$WSL_WORKSPACES_VHDX_FILE" -Dynamic -SizeBytes 100GB
+    New-VHD -Path "$WSL_WORKSPACES_VHDX_FILE" -Dynamic -SizeBytes 100GB
 }

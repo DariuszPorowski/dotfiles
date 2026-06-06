@@ -17,10 +17,10 @@ if [[ -d "${MOUNT_POINT}" ]] && grep -qs " ${MOUNT_POINT} " /proc/mounts; then
   # Ensure shared group ownership and group inheritance for new files.
   # Prefer the invoking user when run via sudo; otherwise fall back to the common first user (uid 1000).
   OWNER_USER="${SUDO_USER:-}"
-  if [[ -z "$OWNER_USER" ]] || [[ "$OWNER_USER" == "root" ]]; then
+  if [[ -z "${OWNER_USER}" ]] || [[ "${OWNER_USER}" == "root" ]]; then
     OWNER_USER="$(getent passwd 1000 | cut -d: -f1 || true)"
   fi
-  if [[ -z "$OWNER_USER" ]]; then
+  if [[ -z "${OWNER_USER}" ]]; then
     OWNER_USER="root"
   fi
 

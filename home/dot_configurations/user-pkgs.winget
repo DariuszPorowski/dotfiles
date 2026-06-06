@@ -220,15 +220,6 @@ properties:
         id: Microsoft.PowerToys
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: Microsoft.Coreutils
-      directives:
-        description: Core Utils
-        allowPrerelease: true
-      settings:
-        source: winget
-        id: Microsoft.Coreutils
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: Brave.Brave
       directives:
         description: Brave

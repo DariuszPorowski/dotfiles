@@ -41,8 +41,15 @@ if ($Sudo) {
         if ($ValidateFirst) { $argumentList += " -ValidateFirst" }
         if ($Sudo) { $argumentList += " -Sudo" }
 
-        Start-Process -FilePath $currentProcess.Path -Verb RunAs -ArgumentList $argumentList -Wait
-        Exit
+        try {
+            $elevated = Start-Process -FilePath $currentProcess.Path -Verb RunAs -ArgumentList $argumentList -Wait -PassThru
+        }
+        catch {
+            Write-Error "Administrator elevation was canceled or failed. Re-run and accept the UAC prompt to apply the WinGet configuration. ($($_.Exception.Message))"
+            Exit 1
+        }
+
+        Exit $elevated.ExitCode
     }
 }
 

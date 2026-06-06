@@ -80,6 +80,7 @@ properties:
       directives:
         description: Enable sudo functionality
         allowPrerelease: true
+        securityContext: elevated
       settings:
         Key: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo
         ValueName: Enabled

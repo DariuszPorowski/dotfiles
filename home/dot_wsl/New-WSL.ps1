@@ -215,6 +215,10 @@ if ($Sparse) {
     Write-LogWarning "Sparse VHD support is disabled by default due to potential data corruption risks."
 
     try {
+        # The VHD must not be attached/running when changing the sparse setting,
+        # otherwise WSL rejects the change. Terminate the instance first.
+        wsl.exe --terminate "$Name" 2>&1 | Out-Null
+
         wsl.exe --manage "$Name" --set-sparse true --allow-unsafe
 
         if ($LASTEXITCODE -ne 0) {

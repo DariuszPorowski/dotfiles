@@ -10,9 +10,9 @@ pkgs:
         # - AgileBits.1Password.CLI
         # - Microsoft.Sysinternals.Suite
         - id: Microsoft.VisualStudioCode
-          override: /VERYSILENT /MERGETASKS=!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath
+          custom: /MERGETASKS=!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath
         - id: Microsoft.VisualStudioCode.Insiders
-          override: /VERYSILENT /MERGETASKS=!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath
+          custom: /MERGETASKS=!runcode,!desktopicon,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath
     choco: []
     scoop: []
     psGallery:

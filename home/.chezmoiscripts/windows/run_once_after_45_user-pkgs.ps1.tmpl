@@ -12,9 +12,9 @@ Write-Host 'INSTALLING WINGET PACKAGES (USER)...'
 $userPackages = @(
 {{- range .pkgs.windows.winget.user }}
     {{- if kindIs "string" . }}
-    @{ Id = '{{ . }}'; Override = $null }
+    @{ Id = '{{ . }}'; Custom = $null }
     {{- else }}
-    @{ Id = '{{ .id }}'; Override = '{{ .override | replace "'" "''" }}' }
+    @{ Id = '{{ .id }}'; Custom = '{{ .custom | replace "'" "''" }}' }
     {{- end }}
 {{- end }}
 )
@@ -26,16 +26,17 @@ foreach ($pkg in $userPackages) {
         'install',
         '--id', $pkg.Id,
         '--exact',
+        '--silent',
         '--accept-source-agreements',
         '--accept-package-agreements',
         '--disable-interactivity',
-        # '--ignore-security-hash',
+        '--ignore-security-hash',
         '--scope', 'user'
     )
 
-    if ($pkg.Override) {
-        $wingetArgs += '--override'
-        $wingetArgs += "`"$($pkg.Override)`""
+    if ($pkg.Custom) {
+        $wingetArgs += '--custom'
+        $wingetArgs += $pkg.Custom
     }
 
     & winget $wingetArgs

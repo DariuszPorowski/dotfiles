@@ -64,26 +64,6 @@ properties:
         id: Docker.DockerCLI
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: Schniz.fnm
-      directives:
-        description: FNM
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: Schniz.fnm
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: astral-sh.uv
-      directives:
-        description: UV
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: astral-sh.uv
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: albertony.npiperelay
       directives:
         description: NPipeRelay
@@ -114,86 +94,6 @@ properties:
         id: Git.GCM
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: eza-community.eza
-      directives:
-        description: EZA
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: eza-community.eza
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: BurntSushi.ripgrep.MSVC
-      directives:
-        description: RipGrep
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: BurntSushi.ripgrep.MSVC
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: sharkdp.bat
-      directives:
-        description: BAT
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: sharkdp.bat
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: GNU.Nano
-      directives:
-        description: Nano
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: GNU.Nano
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: Neovim.Neovim
-      directives:
-        description: NeoVim
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: Neovim.Neovim
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: jqlang.jq
-      directives:
-        description: JQ
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: jqlang.jq
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: MikeFarah.yq
-      directives:
-        description: YQ
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: MikeFarah.yq
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: Task.Task
-      directives:
-        description: Taskfile
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: Task.Task
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: Microsoft.AzureCLI
       directives:
         description: Install Azure CLI
@@ -202,46 +102,6 @@ properties:
       settings:
         source: winget
         id: Microsoft.AzureCLI
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: Microsoft.Azd
-      directives:
-        description: Azure Developer CLI
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: Microsoft.Azd
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: Microsoft.Azure.AZCopy.10
-      directives:
-        description: Install AzCopy
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: Microsoft.Azure.AZCopy.10
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: Microsoft.Bicep
-      directives:
-        description: Bicep CLI
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        id: Microsoft.Bicep
-        source: winget
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: GitHub.cli
-      directives:
-        description: GitHub CLI
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: GitHub.cli
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: PuTTY.PuTTY
@@ -262,46 +122,6 @@ properties:
       settings:
         source: winget
         id: Microsoft.NuGet
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: FiloSottile.age
-      directives:
-        description: AGE
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: FiloSottile.age
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: Microsoft.Edit
-      directives:
-        description: Microsoft Edit
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: Microsoft.Edit
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: direnv.direnv
-      directives:
-        description: DirEnv
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: direnv.direnv
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: twpayne.chezmoi
-      directives:
-        description: ChezMoi
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: twpayne.chezmoi
 
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: Chocolatey.Chocolatey
@@ -362,13 +182,3 @@ properties:
       settings:
         source: winget
         id: FireDaemon.OpenSSL
-
-    - resource: Microsoft.WinGet.DSC/WinGetPackage
-      id: mvdan.shfmt
-      directives:
-        description: shfmt
-        allowPrerelease: true
-        securityContext: elevated
-      settings:
-        source: winget
-        id: mvdan.shfmt

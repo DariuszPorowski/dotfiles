@@ -1,0 +1,187 @@
+#cloud-config
+# yaml-language-server: $schema=https://raw.githubusercontent.com/canonical/cloud-init/main/cloudinit/config/schemas/schema-cloud-config-v1.json
+#
+# Independent GUI-enabled WSL provisioning config.
+#
+# Provides two GUI paths:
+#   1. WSLg (out of the box) - individual Linux GUI apps appear as native
+#      Windows windows. No configuration required; works once GUI apps are
+#      installed (e.g. x11-apps). DISPLAY/WAYLAND_DISPLAY/PULSE_SERVER are set
+#      automatically by WSLg.
+#   2. Full XFCE desktop via XRDP - connect with the Windows Remote Desktop
+#      client (mstsc) to localhost:3390 for a complete desktop session.
+#
+# References:
+#   - https://wsl-ui.octasoft.co.uk/blog/wsl2-gui-part1-wslg
+#   - https://wsl-ui.octasoft.co.uk/blog/wsl2-ubuntu-desktop-xrdp
+---
+locale: en_US.UTF-8
+
+users:
+  - name: __USERNAME__
+    gecos: __USERNAME__
+    groups: users,sudo,netdev,audio,video
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    # XRDP requires a real password to authenticate. The password is seeded in
+    # runcmd (default: the username) and must be changed on first login.
+    lock_passwd: false
+
+disable_root: true
+
+write_files:
+  - path: /etc/wsl.conf
+    content: |
+      [boot]
+      systemd = true
+      command = "/mnt/c/Users/__USERNAME__/.wsl/startup.sh"
+
+      [user]
+      default = __USERNAME__
+
+      [network]
+      hostname = __HOSTNAME__
+      # generateHosts = false
+      # generateResolvConf = false
+
+      [interop]
+      enabled = true
+      appendWindowsPath = false
+
+      [automount]
+      enabled = true
+      mountFsTab = true
+
+  - path: /home/__USERNAME__/.hushlogin
+    owner: __USERNAME__:__USERNAME__
+    defer: true
+
+  - path: /etc/fstab
+    content: |
+      C:	/mnt/c	drvfs	rw,noatime 0 0
+      # D:	/mnt/d	drvfs	rw,noatime 0 0
+      # X:	/mnt/x	drvfs	rw,noatime 0 0
+
+  # Tell XRDP which desktop session to start.
+  - path: /home/__USERNAME__/.xsession
+    owner: __USERNAME__:__USERNAME__
+    permissions: '0644'
+    defer: true
+    content: |
+      startxfce4
+
+  # Avoid the "Authentication required to create a color managed device"
+  # polkit popups that appear in XRDP sessions.
+  - path: /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
+    permissions: '0644'
+    content: |
+      [Allow Colord all Users]
+      Identity=unix-user:*
+      Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile
+      ResultAny=no
+      ResultInactive=no
+      ResultActive=yes
+
+apt:
+  sources:
+    git-core:
+      source: ppa:git-core/ppa
+    golang:
+      source: ppa:longsleep/golang-backports
+
+# update apt database
+package_update: true
+# upgrade the system
+package_upgrade: true
+# reboot after package install if necessary
+package_reboot_if_required: true
+
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - wget
+  - gpg
+  - gnupg2
+  - dos2unix
+  - software-properties-common
+  - apache2-utils
+  - git
+  - jq
+  - make
+  - build-essential
+  - unzip
+  - zip
+  - dnsutils
+  - direnv
+  - mc
+  - zsh
+  - age
+  - golang-go
+  - ntp
+  - net-tools
+  - socat
+  # GUI: full XFCE desktop + XRDP server
+  - xfce4
+  - xfce4-goodies
+  - xrdp
+  - dbus-x11
+  # GUI: WSLg sanity-check apps and GPU info
+  - x11-apps
+  - mesa-utils
+
+runcmd:
+  - |
+    # Set the hostname
+
+    hostnamectl set-hostname __HOSTNAME__
+  - |
+    # Update /etc/hosts with the new hostname
+
+    NEW_HOSTNAME=$(hostname)
+    HOSTS_FILE="/etc/hosts"
+
+    if grep -q "^127.0.1.1" "${HOSTS_FILE}"; then
+        sudo sed -i "s/^127.0.1.1.*/127.0.1.1\t${NEW_HOSTNAME}.localdomain\t${NEW_HOSTNAME}/" "${HOSTS_FILE}"
+    else
+        echo -e "127.0.1.1\t${NEW_HOSTNAME}.localdomain\t${NEW_HOSTNAME}" | sudo tee -a "${HOSTS_FILE}"
+    fi
+  - |
+    # Install PowerShell
+
+    TEMP_DEB=$(mktemp)
+    wget https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -O "${TEMP_DEB}"
+    sudo dpkg -i "${TEMP_DEB}"
+    rm -f "${TEMP_DEB}"
+    sudo apt-get --yes update
+    sudo apt-get --yes install powershell
+  - |
+    # Install Taskfile
+
+    curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | sudo -E bash
+    sudo apt-get --yes update
+    sudo apt-get --yes install task
+  - |
+    # Configure XRDP for a full XFCE desktop over Remote Desktop
+
+    # Use port 3390 to avoid clashing with Windows' own RDP (3389).
+    sudo sed -i 's/^port=3389/port=3390/' /etc/xrdp/xrdp.ini
+
+    # Allow the xrdp user to read the TLS cert (prevents a black screen).
+    sudo adduser xrdp ssl-cert
+
+    # Seed a default password (= username) so XRDP can authenticate, then force
+    # a change on first login. CHANGE THIS IMMEDIATELY with: passwd
+    echo '__USERNAME__:__USERNAME__' | sudo chpasswd
+    sudo chage -d 0 __USERNAME__
+
+    # Enable and start the XRDP service.
+    sudo systemctl enable xrdp
+    sudo systemctl restart xrdp
+
+final_message: |
+  cloud-init done.
+  GUI ready:
+    - WSLg: run any installed Linux GUI app (e.g. 'xclock &').
+    - Full desktop: connect Windows Remote Desktop (mstsc) to localhost:3390.
+  Default XRDP password is your username - change it now with 'passwd'.

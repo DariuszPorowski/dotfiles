@@ -11,6 +11,14 @@ set -eo pipefail
 WSL_EXE="/mnt/c/Windows/System32/wsl.exe"
 CMD_EXE="/mnt/c/Windows/System32/cmd.exe"
 
+# Run cmd.exe from a real Windows path (C:\) instead of the current directory.
+# When the working directory is a WSL UNC path (\\wsl.localhost\<distro>\...),
+# cmd.exe prints "UNC paths are not supported. Defaulting to Windows directory."
+# Running it from /mnt/c avoids that warning.
+run_cmd() {
+  (cd /mnt/c && "$CMD_EXE" "$@")
+}
+
 # Provide the ability to source an .env file to override the default values and provide additional logic.
 # NOTE: This sourced file must have LF line endings, not CRLF, or the mount command will fail.
 if [[ -f "$(dirname "$0")/startup.env" ]]; then
@@ -21,13 +29,13 @@ fi
 # Set WSL_WORKSPACES_VHDX_FILE to a default value if not already set in the .env file.
 if [[ -z "${WSL_WORKSPACES_VHDX_FILE}" ]]; then
   # The windows path to the workspace vhdx file. Default is %userprofile%\.wsl\workspace.vhdx.
-  WSL_WORKSPACES_VHDX_FILE=$($CMD_EXE /c "echo %userprofile%\.wsl\workspaces.vhdx")
+  WSL_WORKSPACES_VHDX_FILE=$(run_cmd /c "echo %userprofile%\.wsl\workspaces.vhdx")
   # Remove the trailing carriage return character from the Windows path.
   WSL_WORKSPACES_VHDX_FILE=$(echo "${WSL_WORKSPACES_VHDX_FILE}" | tr -d '\r')
 fi
 
 # Check on the Windows side if the vhdx file exists. If not, silently exit.
-if ! $CMD_EXE /c "if exist ${WSL_WORKSPACES_VHDX_FILE} (exit 0) else (exit 1)"; then
+if ! run_cmd /c "if exist ${WSL_WORKSPACES_VHDX_FILE} (exit 0) else (exit 1)"; then
   exit 0
 fi
 

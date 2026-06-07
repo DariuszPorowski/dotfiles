@@ -17,9 +17,18 @@
     Username for the new WSL user.
     Default: The Windows username to create a matching user in the WSL instance.
 
+.PARAMETER GUI
+    Provision a GUI-enabled instance. Installs a full XFCE desktop served over
+    XRDP (connect via Remote Desktop to localhost:3390) in addition to the
+    out-of-the-box WSLg support for individual Linux GUI apps.
+
 .EXAMPLE
     .\New-WSLUbuntu.ps1 -Name "ubuntu-dev"
     Creates a new WSL instance named "ubuntu-dev"
+
+.EXAMPLE
+    .\New-WSLUbuntu.ps1 -Name "ubuntu-gui" -GUI
+    Creates a new GUI-enabled WSL instance with an XFCE desktop over XRDP
 
 .NOTES
     Requires WSL2 to be installed and enabled on Windows.
@@ -36,6 +45,9 @@ param(
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [string]$Username = $env:USERNAME,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$GUI,
 
     [Parameter(Mandatory = $false)]
     [switch]$Sparse
@@ -74,8 +86,10 @@ function Write-LogOK {
 #endregion
 
 #region Path Configuration
-# Template file containing cloud-init configuration with placeholders
-$cloudInitConfigTmpl = Join-Path "$PSScriptRoot" 'cloud-init' 'Ubuntu-24.04.user-data'
+# Template file containing cloud-init configuration with placeholders.
+# The -GUI switch selects an independent, GUI-enabled config (XFCE + XRDP).
+$cloudInitTmplName = if ($GUI) { 'Ubuntu-24.04-gui.user-data' } else { 'Ubuntu-24.04.user-data' }
+$cloudInitConfigTmpl = Join-Path "$PSScriptRoot" 'cloud-init' $cloudInitTmplName
 
 # Installation directory for this specific WSL instance
 $installPath = Join-Path $env:LOCALAPPDATA 'WSL' "$Name"
@@ -161,8 +175,12 @@ catch {
 }
 
 # Write the processed cloud-init configuration to user's home directory
-# WSL will read this file during first boot to configure the system
-$cloudInitConfigFile = Join-Path "$cloudInitDirPath" 'Ubuntu-24.04.user-data'
+# WSL will read this file during first boot to configure the system.
+# GUI instances use an instance-specific name (<Name>.user-data), which WSL
+# cloud-init prefers over the distro-wide default, keeping the GUI config
+# independent from regular instances.
+$cloudInitFileName = if ($GUI) { "$Name.user-data" } else { 'Ubuntu-24.04.user-data' }
+$cloudInitConfigFile = Join-Path "$cloudInitDirPath" $cloudInitFileName
 try {
     $cloudInitConfig | Out-File -FilePath $cloudInitConfigFile -Encoding utf8 -Force
     Write-Verbose "Cloud-init configuration written to $cloudInitConfigFile"

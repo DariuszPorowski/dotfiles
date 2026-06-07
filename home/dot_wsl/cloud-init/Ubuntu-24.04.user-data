@@ -36,6 +36,10 @@ write_files:
       enabled = true
       mountFsTab = true
 
+  - path: /home/__USERNAME__/.hushlogin
+    owner: __USERNAME__:__USERNAME__
+    defer: true
+
   - path: /etc/fstab
     content: |
       C:	/mnt/c	drvfs	rw,noatime 0 0

@@ -3,11 +3,35 @@
 set -euo pipefail
 
 CMD_EXE="/mnt/c/Windows/System32/cmd.exe"
-windowsUsername="$($CMD_EXE /c "echo %username%" | tr -d '\r')"
 
-# Candidate locations for npiperelay.exe installed via WinGet (per-user and system-wide)
-npiperelayPaths=(
-  "/mnt/c/Users/$windowsUsername/AppData/Local/Microsoft/WinGet/Links/npiperelay.exe"
+# Determine the Windows username. WSL interop (running .exe files) may be
+# unavailable in some contexts (e.g. under a systemd service), which surfaces
+# as "Exec format error". Tolerate that and fall back gracefully.
+get_windows_username() {
+  local username=""
+
+  if [ -x "$CMD_EXE" ]; then
+    username="$("$CMD_EXE" /c "echo %username%" 2>/dev/null | tr -d '\r' || true)"
+  fi
+
+  if [ -z "$username" ] && command -v wslvar >/dev/null 2>&1; then
+    username="$(wslvar USERNAME 2>/dev/null | tr -d '\r' || true)"
+  fi
+
+  echo "$username"
+}
+
+windowsUsername="$(get_windows_username)"
+
+# Candidate locations for npiperelay.exe installed via WinGet (per-user and
+# system-wide). When the username can't be resolved, fall back to globbing
+# across all Windows user profiles.
+npiperelayPaths=()
+if [ -n "$windowsUsername" ]; then
+  npiperelayPaths+=("/mnt/c/Users/$windowsUsername/AppData/Local/Microsoft/WinGet/Links/npiperelay.exe")
+fi
+npiperelayPaths+=(
+  /mnt/c/Users/*/AppData/Local/Microsoft/WinGet/Links/npiperelay.exe
   "/mnt/c/Program Files/WinGet/Links/npiperelay.exe"
 )
 

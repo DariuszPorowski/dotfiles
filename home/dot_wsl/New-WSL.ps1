@@ -19,8 +19,13 @@
 
 .PARAMETER GUI
     Provision a GUI-enabled instance. Installs a full XFCE desktop served over
-    XRDP (connect via Remote Desktop to localhost:3390) in addition to the
+    XRDP (connect via Remote Desktop to localhost:<Port>) in addition to the
     out-of-the-box WSLg support for individual Linux GUI apps.
+
+.PARAMETER Port
+    The TCP port XRDP listens on for the GUI instance. Defaults to 3389. Use a
+    different port (e.g. 3390) to avoid clashing with the Windows Remote Desktop
+    service when it is enabled on the host. Only used together with -GUI.
 
 .EXAMPLE
     .\New-WSLUbuntu.ps1 -Name "ubuntu-dev"
@@ -28,7 +33,12 @@
 
 .EXAMPLE
     .\New-WSLUbuntu.ps1 -Name "ubuntu-gui" -GUI
-    Creates a new GUI-enabled WSL instance with an XFCE desktop over XRDP
+    Creates a new GUI-enabled WSL instance with an XFCE desktop over XRDP on the
+    default port 3389
+
+.EXAMPLE
+    .\New-WSLUbuntu.ps1 -Name "ubuntu-gui" -GUI -Port 3390
+    Creates a new GUI-enabled WSL instance with XRDP listening on port 3390
 
 .NOTES
     Requires WSL2 to be installed and enabled on Windows.
@@ -48,6 +58,10 @@ param(
 
     [Parameter(Mandatory = $false)]
     [switch]$GUI,
+
+    [Parameter(Mandatory = $false)]
+    [ValidateRange(1, 65535)]
+    [int]$Port = 3389,
 
     [Parameter(Mandatory = $false)]
     [switch]$Sparse
@@ -165,10 +179,12 @@ Write-Verbose "Preparing cloud-init configuration..."
 # Load the cloud-init template and replace placeholders with actual values
 # __USERNAME__: Windows username, used to create matching user in WSL
 # __HOSTNAME__: Instance name, used as the hostname in WSL
+# __RDP_PORT__: XRDP listening port (GUI instances only)
 try {
     $cloudInitConfig = Get-Content $cloudInitConfigTmpl
     $cloudInitConfig = $cloudInitConfig | ForEach-Object { $_ -replace '__USERNAME__', $Username }
     $cloudInitConfig = $cloudInitConfig | ForEach-Object { $_ -replace '__HOSTNAME__', $Name }
+    $cloudInitConfig = $cloudInitConfig | ForEach-Object { $_ -replace '__RDP_PORT__', $Port }
 }
 catch {
     throw "Failed to process cloud-init template: $_"

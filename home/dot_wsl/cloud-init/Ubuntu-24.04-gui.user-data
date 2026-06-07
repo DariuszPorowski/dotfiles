@@ -9,7 +9,7 @@
 #      installed (e.g. x11-apps). DISPLAY/WAYLAND_DISPLAY/PULSE_SERVER are set
 #      automatically by WSLg.
 #   2. Full XFCE desktop via XRDP - connect with the Windows Remote Desktop
-#      client (mstsc) to localhost:3390 for a complete desktop session.
+#      client (mstsc) to localhost:__RDP_PORT__ for a complete desktop session.
 #
 # References:
 #   - https://wsl-ui.octasoft.co.uk/blog/wsl2-gui-part1-wslg
@@ -164,24 +164,29 @@ runcmd:
   - |
     # Configure XRDP for a full XFCE desktop over Remote Desktop
 
-    # Use port 3390 to avoid clashing with Windows' own RDP (3389).
-    sudo sed -i 's/^port=3389/port=3390/' /etc/xrdp/xrdp.ini
+    # Set the XRDP listening port (default 3389; override with -Port to avoid
+    # clashing with the Windows Remote Desktop service when enabled).
+    sudo sed -i 's/^port=3389/port=__RDP_PORT__/' /etc/xrdp/xrdp.ini
 
     # Allow the xrdp user to read the TLS cert (prevents a black screen).
     sudo adduser xrdp ssl-cert
 
-    # Seed a default password (= username) so XRDP can authenticate, then force
-    # a change on first login. CHANGE THIS IMMEDIATELY with: passwd
-    echo '__USERNAME__:__USERNAME__' | sudo chpasswd
-    sudo chage -d 0 __USERNAME__
+    # Make the XFCE session the default for XRDP at the system level too, so a
+    # login works even if a user's ~/.xsession is missing.
+    echo 'startxfce4' | sudo tee /etc/skel/.xsession >/dev/null
 
-    # Enable and start the XRDP service.
+    # Seed a default password (= username) so the XRDP session can log in fully
+    # unattended. NOTE: this is a weak default - change it with: passwd
+    echo '__USERNAME__:__USERNAME__' | sudo chpasswd
+
+    # Enable XRDP so it auto-starts on every WSL boot, and start it now.
     sudo systemctl enable xrdp
     sudo systemctl restart xrdp
 
 final_message: |
   cloud-init done.
-  GUI ready:
+  GUI ready (no further setup needed):
     - WSLg: run any installed Linux GUI app (e.g. 'xclock &').
-    - Full desktop: connect Windows Remote Desktop (mstsc) to localhost:3390.
-  Default XRDP password is your username - change it now with 'passwd'.
+    - Full desktop: connect Windows Remote Desktop (mstsc) to localhost:__RDP_PORT__
+      and log in with your username. XRDP auto-starts on every WSL boot.
+  SECURITY: the default password equals your username - change it with 'passwd'.

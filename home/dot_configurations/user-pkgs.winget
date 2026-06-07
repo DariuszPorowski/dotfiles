@@ -228,6 +228,15 @@ properties:
         source: winget
         id: Brave.Brave
 
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: WSL.UI
+      directives:
+        description: WSL UI
+        allowPrerelease: true
+      settings:
+        source: msstore
+        id: 9P8548KNJ2M9
+
     # - resource: Microsoft.WinGet.DSC/WinGetPackage
     #   id: Microsoft.VisualStudioCode
     #   directives:

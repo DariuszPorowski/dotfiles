@@ -23,7 +23,7 @@
     out-of-the-box WSLg support for individual Linux GUI apps.
 
 .PARAMETER Port
-    The TCP port XRDP listens on for the GUI instance. Defaults to 3389. Use a
+    The TCP port XRDP listens on for the GUI instance. Defaults to 3390. Use a
     different port (e.g. 3390) to avoid clashing with the Windows Remote Desktop
     service when it is enabled on the host. Only used together with -GUI.
 
@@ -34,7 +34,7 @@
 .EXAMPLE
     .\New-WSLUbuntu.ps1 -Name "ubuntu-gui" -GUI
     Creates a new GUI-enabled WSL instance with an XFCE desktop over XRDP on the
-    default port 3389
+    default port 3390
 
 .EXAMPLE
     .\New-WSLUbuntu.ps1 -Name "ubuntu-gui" -GUI -Port 3390
@@ -61,7 +61,7 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateRange(1, 65535)]
-    [int]$Port = 3389,
+    [int]$Port = 3390,
 
     [Parameter(Mandatory = $false)]
     [switch]$Sparse

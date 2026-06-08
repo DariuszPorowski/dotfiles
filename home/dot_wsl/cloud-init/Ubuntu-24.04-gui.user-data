@@ -23,11 +23,24 @@ users:
     groups: users,sudo,netdev,audio,video
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
-    # XRDP requires a real password to authenticate. The password is seeded in
-    # runcmd (default: the username) and must be changed on first login.
+    # XRDP requires a real password to authenticate. The password is seeded via
+    # the chpasswd module below (default: the username).
     lock_passwd: false
 
 disable_root: true
+
+# Seed the login password (= username) using cloud-init's dedicated password
+# module. This is more reliable than seeding in runcmd and, critically,
+# expire: false prevents the account from being flagged "password expired",
+# which otherwise forces a password change on first login (the "Current
+# password:" prompt) and can leave the seeded password unusable.
+# NOTE: this is a weak default - change it after first login with: passwd
+chpasswd:
+  expire: false
+  users:
+    - name: __USERNAME__
+      password: __USERNAME__
+      type: text
 
 write_files:
   - path: /etc/wsl.conf
@@ -65,7 +78,7 @@ write_files:
   # Tell XRDP which desktop session to start.
   - path: /home/__USERNAME__/.xsession
     owner: __USERNAME__:__USERNAME__
-    permissions: '0644'
+    permissions: "0644"
     defer: true
     content: |
       startxfce4
@@ -73,7 +86,7 @@ write_files:
   # Avoid the "Authentication required to create a color managed device"
   # polkit popups that appear in XRDP sessions.
   - path: /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
-    permissions: '0644'
+    permissions: "0644"
     content: |
       [Allow Colord all Users]
       Identity=unix-user:*
@@ -174,10 +187,6 @@ runcmd:
     # Make the XFCE session the default for XRDP at the system level too, so a
     # login works even if a user's ~/.xsession is missing.
     echo 'startxfce4' | sudo tee /etc/skel/.xsession >/dev/null
-
-    # Seed a default password (= username) so the XRDP session can log in fully
-    # unattended. NOTE: this is a weak default - change it with: passwd
-    echo '__USERNAME__:__USERNAME__' | sudo chpasswd
 
     # Enable XRDP so it auto-starts on every WSL boot, and start it now.
     sudo systemctl enable xrdp

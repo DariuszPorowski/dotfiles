@@ -59,7 +59,7 @@ write_files:
 
       [interop]
       enabled = true
-      appendWindowsPath = false
+      appendWindowsPath = true
 
       [automount]
       enabled = true

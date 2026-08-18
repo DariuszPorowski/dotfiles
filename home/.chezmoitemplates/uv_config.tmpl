@@ -1,0 +1,8 @@
+{{- $managed := "# chezmoi:begin packagefeedproxy\n[[index]]\nname = \"packagefeedproxy\"\nurl = \"https://packagefeedproxy.microsoft.io/pypi/simple\"\ndefault = true\n# chezmoi:end packagefeedproxy" -}}
+{{- $input := .chezmoi.stdin | replaceAllRegex "\r\n" "\n" -}}
+{{- $existing := $input | replaceAllRegex "(?ms)^# chezmoi:begin packagefeedproxy\\n.*?^# chezmoi:end packagefeedproxy\\n?" "" | trim -}}
+{{- if $existing -}}
+{{ $existing }}
+
+{{ end -}}
+{{ printf "%s\n" $managed -}}

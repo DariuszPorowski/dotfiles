@@ -50,6 +50,18 @@ autorun.cmd
 .wslconfig
 {{- end }}
 
+{{ if or (eq .chezmoi.os "windows") (eq .chezmoi.os "darwin") }}
+.config/pip/**
+{{- end }}
+
+{{ if eq .chezmoi.os "windows" }}
+.config/uv/**
+{{- end }}
+
+{{ if ne .chezmoi.os "darwin" }}
+Library/Application Support/pip/**
+{{- end }}
+
 {{ if eq .chezmoi.os "windows" }}
 .local/**
 .bashrc

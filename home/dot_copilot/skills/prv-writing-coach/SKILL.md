@@ -19,7 +19,7 @@ This skill is **pluggable**. Each coaching concern is a self-contained *lens* in
 
 ## Relationship to other skills
 
-The coach fixes **substance and framing**; `classic-style` fixes **prose**. Natural order: **coach first, then classic-style.** If the user wants both, run the coach, settle the open questions, then hand the result to `classic-style`.
+The coach fixes **substance and framing**; `prv-classic-style` fixes **prose**. Natural order: **coach first, then prv-classic-style.** If the user wants both, run the coach, settle the open questions, then hand the result to `prv-classic-style`.
 
 ## Inputs
 

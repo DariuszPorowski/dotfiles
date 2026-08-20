@@ -33,7 +33,7 @@ Then:
 - **Name owners and dates** on every commitment.
 - **Qualify each risk** with likelihood and mitigation, and don't hide the ugly one.
 
-For prose polish, machine phrasing, and AI tells such as em-dashes, this lens defers to the `classic-style` skill. Recommend a follow-up `classic-style` pass rather than flagging those here, so the two skills don't overlap.
+For prose polish, machine phrasing, and AI tells such as em-dashes, this lens defers to the `prv-classic-style` skill. Recommend a follow-up `prv-classic-style` pass rather than flagging those here, so the two skills don't overlap.
 
 Do not invent facts to fill the structure. Where the draft lacks an owner, a date, a metric, or the ask, that is a finding: ask the author, or mark it `[NEEDS: …]`.
 

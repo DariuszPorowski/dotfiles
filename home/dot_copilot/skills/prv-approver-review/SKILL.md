@@ -27,7 +27,7 @@ Structure dense explanations as **conclusion → mechanism → consequence**. A 
 
 Use repository-specific review or code-quality skills when they apply. Use security specialists when the user explicitly requests a security review.
 
-Before presenting the final assessment, invoke `classic-style` and apply its guidance silently. Preserve technical qualifications and uncertainty. Do not add a separate prose-editing appendix.
+Before presenting the final assessment, invoke `prv-classic-style` and apply its guidance silently. Preserve technical qualifications and uncertainty. Do not add a separate prose-editing appendix.
 
 ## Inputs
 

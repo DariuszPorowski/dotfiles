@@ -1,5 +1,5 @@
 ---
-name: classic-style
+name: prv-classic-style
 description: 'Rewrite text in the Classic Style described by Steven Pinker in "The Sense of Style" (drawn from Thomas & Turner''s "Clear and Simple as the Truth"). Strips AI writing artifacts (em-dashes, "not just X but Y", delve/leverage, rule-of-three padding, reflexive hedging) and rewrites prose as a clear window onto the world: concrete nouns, active verbs, a visible agent, no metadiscourse. Use when the user says "rewrite in classic style", "classic style this", "Pinker-ify", "de-AI this", "make this sound human", or asks to remove em-dashes and AI tells.'
 argument-hint: 'Paste or point to the text to rewrite; optionally say how aggressive to be (light touch vs. full rewrite)'
 ---

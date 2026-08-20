@@ -1,5 +1,5 @@
 ---
-name: writing-coach
+name: prv-writing-coach
 description: 'A pluggable writing coach that critiques a draft against a set of coaching "lenses" and pushes back where it falls short. Ships with three lenses: specificity (calls out vague claims and missing detail, then asks for what is missing instead of guessing), impact-over-activity (flags "reading the news" prose that narrates activity and reframes it around outcomes and so-what), and executive-audience (checks SLT/exec updates for BLUF, an explicit ask, and one-screen brevity). Unlike a rewriter, the coach finds what is missing or mis-framed and asks pointed questions rather than fabricating facts. Add new lenses by dropping a markdown file in lenses/. Use when the user says "coach my writing", "critique this draft", "call me out", "is this detailed enough", "make this about impact not activity", "am I just reading the news", "is this ready for the SLT/execs", or "review this before I send it".'
 argument-hint: 'Paste or point to the draft. Optionally name a lens ("just the impact lens") or say "critique only" vs "critique and rewrite".'
 ---

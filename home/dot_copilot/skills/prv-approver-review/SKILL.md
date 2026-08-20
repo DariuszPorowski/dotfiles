@@ -1,5 +1,5 @@
 ---
-name: approver-review
+name: prv-approver-review
 description: "Produce a technically deep, readable assessment that helps an approver understand a pull request before approving it. Use when the user asks for an approver review, a detailed PR assessment, help understanding a PR, or an approval recommendation. Compare the PR's stated intent with the code, trace data and control flow, examine architecture, contracts, failure handling, lifecycle, security, operations, tests, compatibility, and rollback, then explain important implementation decisions and credible alternatives for a technical generalist."
 argument-hint: "Provide a PR number or URL. Optionally name areas to emphasize."
 ---

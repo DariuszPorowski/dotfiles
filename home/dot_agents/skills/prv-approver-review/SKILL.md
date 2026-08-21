@@ -48,6 +48,42 @@ If no PR can be identified, ask for one. Do not infer a different PR.
 7. Never approve because CI is green. Never reject because a different design also could work.
 8. Cite repository-relative files and exact lines for consequential claims.
 
+## Conventional Comments
+
+Format every author-facing finding and inline review comment according to [Conventional Comments](https://conventionalcomments.org/):
+
+```text
+<label>[decorations]: <subject>
+
+[discussion]
+```
+
+The label is required. Decorations and discussion are optional. Use one label per comment and keep decorations comma-separated inside parentheses.
+
+Use the standard labels according to their intended meaning:
+
+- `issue`: a verified defect or material problem; pair it with a concrete resolution when possible
+- `suggestion`: a specific improvement to consider
+- `question`: an uncertainty that the author must clarify or investigate
+- `todo`: a small, necessary code or content change
+- `chore`: a required process or housekeeping step
+- `nitpick`: a trivial preference that never blocks approval
+- `thought`: a non-blocking idea for consideration
+- `note`: non-blocking information the author should notice
+- `praise`: specific, sincere positive feedback
+
+Use `(blocking)` only when the comment must be resolved before approval and `(non-blocking)` when it should not delay acceptance. Use `(if-minor)` when the author should act only if the change remains small. Add at most one useful concern decoration such as `security`, `test`, `operations`, or `compatibility`; severity must remain explicit when it affects approval. For example:
+
+```text
+issue(security,blocking): Reject paths outside the configured workspace
+
+The new join accepts `..` segments and can read files outside the trust boundary. Resolve the candidate path and verify that it remains beneath the workspace root before opening it.
+```
+
+Make the subject concrete and self-contained. Put evidence, consequence, and a practical next step in the discussion, with an exact changed-line citation. Keep separate concerns in separate comments. Do not disguise a verified issue as a question or use a label to compensate for vague feedback.
+
+Conventional Comments apply to feedback directed at the author, not to the assessment's orientation, control-flow explanation, risk register, or approval rationale. The answered questions under **Key implementation decisions** are explanatory headings, not review comments.
+
 ## Large PR mode
 
 Use Large PR mode when the change exceeds roughly 1,000 changed lines, spans more than 30 files, crosses several subsystems, or cannot fit comfortably in one review pass. A 5,000-line PR is reviewable when its scope is coherent and the review remains accountable.
@@ -84,16 +120,16 @@ Do not divide one continuous control flow among reviewers. A batch should contai
 
 Track every changed file with:
 
-| Field | Meaning |
-|---|---|
-| File | Repository-relative path |
-| Category | Production, test, configuration, dependency, migration, generated, or documentation |
-| Subsystem | Coherent review group |
-| Risk | High, medium, or low |
-| Depth | Deep, sampled, mechanical, generated, deferred, or blocked |
-| Decision | Implementation decision or seam it supports |
-| Evidence | Relevant tests, checks, callers, and specifications |
-| Status | Pending or complete |
+| Field     | Meaning                                                                             |
+| --------- | ----------------------------------------------------------------------------------- |
+| File      | Repository-relative path                                                            |
+| Category  | Production, test, configuration, dependency, migration, generated, or documentation |
+| Subsystem | Coherent review group                                                               |
+| Risk      | High, medium, or low                                                                |
+| Depth     | Deep, sampled, mechanical, generated, deferred, or blocked                          |
+| Decision  | Implementation decision or seam it supports                                         |
+| Evidence  | Relevant tests, checks, callers, and specifications                                 |
+| Status    | Pending or complete                                                                 |
 
 `Deep` means the implementation and its relevant callers and callees were read. `Sampled` is allowed only for low-risk repetition after verifying the governing rule and representative edge cases. Never sample security-sensitive, destructive, concurrent, persistent, public-contract, or hand-written behavioral code.
 
@@ -307,6 +343,8 @@ Findings must be actionable and cite exact changed lines. Separate:
 - **Non-blocking concerns**
 - **Strengths**
 - **Residual risks**
+
+Format each author-facing entry in these groups as a Conventional Comment. A section heading does not replace the `(blocking)` or `(non-blocking)` decoration: state approval impact on each actionable comment. Use `praise:` for strengths. Residual risks that require no author action may remain concise risk statements rather than review comments.
 
 End with one recommendation:
 

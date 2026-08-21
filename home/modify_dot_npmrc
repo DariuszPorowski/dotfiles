@@ -1,7 +1,11 @@
 {{- /* chezmoi:modify-template */ -}}
+{{- if .machine.codespace -}}
+{{ .chezmoi.stdin }}
+{{- else -}}
 {{- $managed := "registry=https://packagefeedproxy.microsoft.io/npm" -}}
 {{- $existing := .chezmoi.stdin | replaceAllRegex "(?m)^registry=https://packagefeedproxy\\.microsoft\\.io/npm\\r?$\\n?" "" | trimSuffix "\n" | trimSuffix "\r" -}}
 {{- if $existing -}}
 {{ $existing }}
 {{ end -}}
 {{ printf "%s\n" $managed -}}
+{{- end -}}

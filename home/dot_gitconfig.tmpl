@@ -96,6 +96,10 @@
   useHttpPath = true
 {{- end }}
 
+# Personal profile is the default; directory-specific profiles below override it.
+[include]
+  path = ~/.gh_personal.gitconfig
+
 {{- if .machine.windows }}
 # Windows-specific settings
 [includeIf "gitdir/i:X:/gh_personal/**"]

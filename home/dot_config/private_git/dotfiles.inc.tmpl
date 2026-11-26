@@ -1,0 +1,37 @@
+# Defaults for ephemeral environments. Host settings are read after this file.
+[init]
+  defaultBranch = main
+[fetch]
+  prune = true
+  pruneTags = true
+  all = true
+[pull]
+  rebase = true
+[push]
+  autoSetupRemote = true
+  default = current
+[rebase]
+  autoSquash = true
+  autoStash = true
+  updateRefs = true
+  stat = true
+[submodule]
+  recurse = true
+[color]
+  ui = auto
+[core]
+  autoCrlf = input
+  excludesfile = ~/.gitignore
+  attributesfile = ~/.gitattributes
+{{- if .machine.windows }}
+  longpaths = true
+{{- end }}
+{{- if lookPath "git-lfs" }}
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+{{- end }}
+[alias]
+  logp = log --graph --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --date=relative

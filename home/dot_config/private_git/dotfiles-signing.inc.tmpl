@@ -1,0 +1,27 @@
+{{- if and .machine.ephemeral (or (not .machine.linux) .machine.ci .machine.codespace) -}}
+# Leave signing to the host in CI and Codespaces, even if a copied config includes this file.
+{{- else -}}
+{{- if .machine.ephemeral -}}
+# Optional public identity mounted for this dev container; Git ignores a missing include.
+[include]
+  path = ~/.config/git/host-identity.inc
+{{ end -}}
+[commit]
+  gpgSign = true
+[gpg]
+  format = ssh
+[gpg "ssh"]
+{{- if or .machine.ephemeral (and .machine.wsl (eq .chezmoi.arch "arm64")) }}
+{{- $signer := joinPath .chezmoi.destDir ".config" "git" "dotfiles-agent-sign" | replace "\\" "/" }}
+  program = {{ $signer | quote }}
+  defaultKeyCommand = {{ printf "%s --default-key" ($signer | quote) | quote }}
+{{- else if .machine.wsl }}
+  program = {{ printf "%s/AppData/Local/Microsoft/WindowsApps/op-ssh-sign-wsl.exe" .machine.windows_profile | quote }}
+{{- else if .machine.windows }}
+  program = {{ printf "%s/AppData/Local/Microsoft/WindowsApps/op-ssh-sign.exe" .chezmoi.destDir | quote }}
+{{- else if .machine.mac }}
+  program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+{{- else }}
+  program = {{ lookPath "op-ssh-sign" | default "/opt/1Password/op-ssh-sign" | quote }}
+{{- end }}
+{{- end }}

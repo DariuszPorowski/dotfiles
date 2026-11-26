@@ -1,0 +1,3 @@
+$ErrorActionPreference = 'Stop'
+winget upgrade --all --accept-package-agreements --accept-source-agreements --disable-interactivity --scope user
+if ($LASTEXITCODE -notin 0, -1978335189) { throw "WinGet user upgrade failed: $LASTEXITCODE" }

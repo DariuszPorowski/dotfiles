@@ -1,0 +1,49 @@
+{{- if and .machine.windows (not .machine.ephemeral) (ne (includeTemplate "is-ci.tmpl" .) "true") -}}
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $false
+
+function Get-PodmanInstallDir([Microsoft.Win32.RegistryHive]$Hive) {
+    # The x64 and ARM64 MSIs write InstallDir in the 64-bit view of their installation hive.
+    $base = [Microsoft.Win32.RegistryKey]::OpenBaseKey($Hive, 'Registry64')
+    try {
+        $key = $base.OpenSubKey('SOFTWARE\Podman')
+        if ($key) {
+            try { $key.GetValue('InstallDir') } finally { $key.Dispose() }
+        }
+    } finally { $base.Dispose() }
+}
+
+function Test-PodmanCli([switch]$MachineOnly) {
+    $dirs = @((Join-Path ([Environment]::GetFolderPath('ProgramFiles')) 'Podman'), (Get-PodmanInstallDir LocalMachine))
+    if (-not $MachineOnly) {
+        if (Get-Command podman.exe -CommandType Application -ErrorAction SilentlyContinue) { return $true }
+        $dirs += (Join-Path $env:LOCALAPPDATA 'Programs\Podman'), (Get-PodmanInstallDir CurrentUser)
+    }
+    foreach ($dir in $dirs) {
+        if ($dir -and (Test-Path -LiteralPath (Join-Path $dir 'podman.exe') -PathType Leaf)) { return $true }
+    }
+    return $false
+}
+
+if (Test-PodmanCli) { return }
+
+# The dual-scope MSI defaults to per-user and its WinGet manifest has no scope selector.
+$packageArgs = @('--id', 'Podman.CLI', '--exact', '--source', 'winget', '--silent', '--accept-source-agreements', '--accept-package-agreements', '--disable-interactivity')
+winget install @packageArgs --no-upgrade --custom 'ALLUSERS=1'
+$code = $LASTEXITCODE
+if ($code -in -1978335135, -1978335189) {
+    # Already installed / no applicable update. Repair the registered product without changing scope.
+    if (Test-PodmanCli) { return }
+    Write-Host 'WinGet reports Podman.CLI is installed but podman.exe is missing. Repairing the existing installation...'
+    winget repair @packageArgs
+    $code = $LASTEXITCODE
+    if ($code -ne 0 -or -not (Test-PodmanCli)) {
+        throw "Could not verify podman.exe after WinGet repair (exit $code). Check 'winget list --id Podman.CLI --exact' with '--scope user' and '--scope machine' on this PC."
+    }
+    return
+}
+if ($code -ne 0) { throw "Podman CLI installation failed: $code" }
+if (-not (Test-PodmanCli -MachineOnly)) {
+    throw 'The Podman installer reported success, but podman.exe was not found in Program Files or the machine MSI InstallDir. Check: winget list --id Podman.CLI --exact --scope machine'
+}
+{{ end -}}

@@ -1,0 +1,184 @@
+#cloud-config
+# yaml-language-server: $schema=https://raw.githubusercontent.com/canonical/cloud-init/26.1/cloudinit/config/schemas/schema-cloud-config-v1.json
+#
+# Independent GUI-enabled WSL provisioning config.
+#
+# Provides two GUI paths:
+#   1. WSLg (out of the box) - individual Linux GUI apps appear as native
+#      Windows windows. No configuration required; works once GUI apps are
+#      installed (e.g. x11-apps). DISPLAY/WAYLAND_DISPLAY/PULSE_SERVER are set
+#      automatically by WSLg.
+#   2. Full XFCE desktop via XRDP - connect with the Windows Remote Desktop
+#      client (mstsc) to localhost:__RDP_PORT__ for a complete desktop session.
+#
+# References:
+#   - https://wsl-ui.octasoft.co.uk/blog/wsl2-gui-part1-wslg
+#   - https://wsl-ui.octasoft.co.uk/blog/wsl2-ubuntu-desktop-xrdp
+---
+locale: en_US.UTF-8
+fqdn: "__HOSTNAME__"
+prefer_fqdn_over_hostname: true
+manage_etc_hosts: localhost
+
+users:
+  - name: "__USERNAME__"
+    gecos: "__USERNAME__"
+    groups: [users, sudo, netdev, audio, video]
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: true
+
+disable_root: true
+ssh_pwauth: false
+
+# Persist both masks across a failed first boot, but do not re-mask a configured service on reboot.
+bootcmd:
+  - [cloud-init-per, instance, hold-xrdp, systemctl, mask, xrdp.service, xrdp.socket]
+
+write_files:
+  - path: /etc/wsl.conf
+    append: true
+    content: |
+
+      [user]
+      default = __USERNAME__
+
+      [network]
+      hostname = __HOSTNAME__
+
+  - path: /home/__USERNAME__/.hushlogin
+    owner: __USERNAME__:__USERNAME__
+    defer: true
+
+  - path: /etc/fstab
+    append: true
+    content: |
+      C:	/mnt/c	drvfs	rw,noatime 0 0
+      # D:	/mnt/d	drvfs	rw,noatime 0 0
+      # X:	/mnt/x	drvfs	rw,noatime 0 0
+
+  # Tell XRDP which desktop session to start.
+  - path: /home/__USERNAME__/.xsession
+    owner: __USERNAME__:__USERNAME__
+    permissions: "0644"
+    defer: true
+    content: |
+      startxfce4
+
+  # Avoid the "Authentication required to create a color managed device"
+  # polkit popups that appear in XRDP sessions.
+  - path: /etc/polkit-1/rules.d/45-allow-colord.rules
+    permissions: "0644"
+    content: |
+      polkit.addRule(function(action, subject) {
+          if (subject.active && subject.user === "__USERNAME__" &&
+              /^org\.freedesktop\.color-manager\.(create|delete|modify)-(device|profile)$/.test(action.id)) {
+              return polkit.Result.YES;
+          }
+      });
+
+  - path: /etc/apt/keyrings/microsoft-2025.asc
+    source:
+      uri: https://packages.microsoft.com/keys/microsoft-2025.asc
+  - path: /etc/apt/sources.list.d/microsoft-prod.sources
+    content: |
+      Types: deb
+      URIs: https://packages.microsoft.com/ubuntu/26.04/prod
+      Suites: resolute
+      Components: main
+      Signed-By: /etc/apt/keyrings/microsoft-2025.asc AA86F75E427A19DD33346403EE4D7792F748182B
+
+  - path: /etc/apt/keyrings/task.asc
+    source:
+      uri: https://dl.cloudsmith.io/public/task/task/gpg.046FD1186CA342F0.key
+  - path: /etc/apt/sources.list.d/task.sources
+    content: |
+      Types: deb
+      URIs: https://dl.cloudsmith.io/public/task/task/deb/ubuntu
+      Suites: resolute
+      Components: main
+      Signed-By: /etc/apt/keyrings/task.asc D19803B9E1AA18999752F1CA046FD1186CA342F0
+
+apt:
+  sources:
+    git-core:
+      source: ppa:git-core/ppa
+    golang:
+      source: ppa:longsleep/golang-backports
+
+package_update: true
+package_upgrade: true
+# The Windows launcher waits for first boot; do not reboot the guest underneath it.
+package_reboot_if_required: false
+
+packages:
+  - ca-certificates
+  - curl
+  - wget
+  - gpg
+  - gnupg
+  - dos2unix
+  - software-properties-common
+  - apache2-utils
+  - git
+  - jq
+  - make
+  - build-essential
+  - unzip
+  - zip
+  - bind9-dnsutils
+  - direnv
+  - mc
+  - zsh
+  - age
+  - golang-go
+  - net-tools
+  - socat
+  # GUI: full XFCE desktop + XRDP server
+  - xfce4
+  - xfce4-goodies
+  # xrdp itself is installed only after checking the early masks (below).
+  - dbus-x11
+  # GUI: WSLg sanity-check apps and GPU info
+  - x11-apps
+  - mesa-utils
+
+runcmd:
+  - |
+    failed=0
+    sh -eu <<'XRDP' || failed=1
+    # Do not let package postinst start a listener with its stock configuration.
+    for unit in xrdp.service xrdp.socket; do
+      [ "$(systemctl show -p LoadState --value "$unit")" = masked ]
+    done
+    DEBIAN_FRONTEND=noninteractive apt-get --yes install xrdp
+    ini=/etc/xrdp/xrdp.ini
+    port='tcp://127.0.0.1:__RDP_PORT__'
+    sed -i "/^\[Globals\]/,/^\[/s|^port=.*|port=$port|" "$ini"
+    # Verify exactly one effective Globals port, not an example or another section's port.
+    awk -v expected="port=$port" '
+      /^[[:space:]]*\[/ { globals = (tolower($0) ~ /^[[:space:]]*\[globals\][[:space:]]*$/) }
+      globals && tolower($0) ~ /^[[:space:]]*port[[:space:]]*=/ { count++; if ($0 != expected) bad=1 }
+      END { exit !(count == 1 && !bad) }
+    ' "$ini"
+    adduser xrdp ssl-cert
+    printf '%s\n' startxfce4 > /etc/skel/.xsession
+    # Use only the verified service listener; leave socket activation masked.
+    systemctl unmask xrdp.service
+    systemctl enable --now xrdp.service
+    XRDP
+  - |
+    case "$(dpkg --print-architecture)" in
+      amd64) apt-get --yes install powershell || failed=1 ;;
+      arm64) snap install powershell --classic --channel=latest/stable || failed=1 ;;
+      *) echo 'Unsupported guest architecture for PowerShell' >&2; failed=1 ;;
+    esac
+    apt-get --yes install task || failed=1
+    exit "$failed"
+
+final_message: |
+  cloud-init done.
+  GUI setup:
+    - WSLg: run any installed Linux GUI app (e.g. 'xclock &').
+    - Set a password from Windows: wsl -d __HOSTNAME__ -u root -- passwd __USERNAME__
+    - Then connect Windows Remote Desktop to localhost:__RDP_PORT__.

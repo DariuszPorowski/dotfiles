@@ -1,12 +1,24 @@
-{{- if .machine.codespace -}}
-{{ .chezmoi.stdin }}
+{{- $profile := get .machine "profile" -}}
+{{- if or .machine.ephemeral (not $profile) -}}
+{{ .chezmoi.stdin -}}
 {{- else -}}
-{{- $managed := "# chezmoi:begin packagefeedproxy\n[[index]]\nname = \"packagefeedproxy\"\nurl = \"https://packagefeedproxy.microsoft.io/pypi/simple\"\ndefault = true\n# chezmoi:end packagefeedproxy" -}}
-{{- $input := .chezmoi.stdin | replaceAllRegex "\r\n" "\n" -}}
-{{- $existing := $input | replaceAllRegex "(?ms)^# chezmoi:begin packagefeedproxy\\n.*?^# chezmoi:end packagefeedproxy\\n?" "" | trim -}}
-{{- if $existing -}}
-{{ $existing }}
-
-{{ end -}}
-{{ printf "%s\n" $managed -}}
+{{- $block := printf "# chezmoi:begin packagefeedproxy\n[[index]]\nname = \"packagefeedproxy\"\nurl = %q\ndefault = true\n# chezmoi:end packagefeedproxy" .packageFeeds.python -}}
+{{- $oldBlock := $block | replace .packageFeeds.python (trimSuffix "/" .packageFeeds.python) -}}
+{{- $pattern := printf `(?m)^(?:%s|%s)(?:\r?\n|$)` (regexQuoteMeta $block) (regexQuoteMeta $oldBlock) | replace "\n" `\r?\n` -}}
+{{- $existing := .chezmoi.stdin | replaceAllRegex $pattern "" -}}
+{{- if regexMatch `(?m)^# chezmoi:(begin|end) packagefeedproxy\r?$` $existing -}}
+{{-   fail "The managed uv index was edited. Move custom settings outside its markers before applying." -}}
+{{- end -}}
+{{ $existing -}}
+{{- $add := eq $profile "work" -}}
+{{- if $add -}}
+{{-   range $index := (get (fromToml $existing | default dict) "index" | default list) -}}
+{{-     if or (get $index "default") (eq (get $index "name") "packagefeedproxy") }}{{ $add = false }}{{ end -}}
+{{-   end -}}
+{{- end -}}
+{{- if $add -}}
+{{- $eol := ternary "\r\n" "\n" (contains "\r\n" .chezmoi.stdin) -}}
+{{- if and $existing (not (hasSuffix "\n" $existing)) }}{{ $eol }}{{ end -}}
+{{ $block | replace "\n" $eol }}{{ $eol -}}
+{{- end -}}
 {{- end -}}

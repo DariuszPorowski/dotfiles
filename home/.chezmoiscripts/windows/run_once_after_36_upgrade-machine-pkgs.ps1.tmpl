@@ -1,0 +1,8 @@
+$ErrorActionPreference = 'Stop'
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    $child = Start-Process -FilePath (Get-Process -Id $PID).Path -Verb RunAs -Wait -PassThru -ArgumentList "-NoProfile -File `"$PSCommandPath`""
+    exit $child.ExitCode
+}
+
+winget upgrade --all --accept-package-agreements --accept-source-agreements --disable-interactivity --scope machine
+if ($LASTEXITCODE -notin 0, -1978335189) { throw "WinGet machine upgrade failed: $LASTEXITCODE" }

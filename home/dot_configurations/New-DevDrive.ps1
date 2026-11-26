@@ -125,6 +125,7 @@ function Write-ProgressMessage {
 
 #region Main Script Logic
 
+$createdVhd = $false
 try {
     Write-LogOK "`nDev Drive Setup Script"
     Write-LogOK ("=" * 60)
@@ -150,10 +151,11 @@ try {
 
         if ($PSCmdlet.ShouldProcess($ResolvedPath, "Create new VHDX with size $Size")) {
             $vhdx = New-VHD -Path $ResolvedPath -Dynamic -SizeBytes $Size
+            $createdVhd = $true
             Write-Verbose "VHDX created successfully: $($vhdx.Path)"
 
             Write-ProgressMessage "Mounting VHDX..."
-            $disk = $vhdx | Mount-VHD -Passthru
+            $disk = $vhdx | Mount-VHD -Passthru | Get-Disk
             Write-Verbose "VHDX mounted as Disk Number: $($disk.Number)"
 
             Write-ProgressMessage "Initializing disk (GPT partition style)..."
@@ -205,7 +207,7 @@ try {
         Write-ProgressMessage "VHDX is not mounted. Mounting now..."
 
         if ($PSCmdlet.ShouldProcess($ResolvedPath, "Mount existing VHDX")) {
-            $disk = $existingVhd | Mount-VHD -Passthru
+            $disk = $existingVhd | Mount-VHD -Passthru | Get-Disk
             Write-Verbose "VHDX mounted successfully as Disk Number: $($disk.Number)"
 
             # Get volume information
@@ -230,11 +232,11 @@ catch {
     Write-Verbose "Full error: $($_ | Out-String)"
 
     # Attempt cleanup on failure for new VHDs
-    if ($isNewVhd -and (Test-Path -Path $ResolvedPath -ErrorAction SilentlyContinue)) {
+    if ($createdVhd -and (Test-Path -LiteralPath $ResolvedPath -PathType Leaf)) {
         Write-Warning "Attempting to clean up partially created VHDX..."
         try {
-            Dismount-VHD -Path $ResolvedPath -ErrorAction SilentlyContinue
-            Remove-Item -Path $ResolvedPath -Force -ErrorAction SilentlyContinue
+            if ((Get-VHD -Path $ResolvedPath).Attached) { Dismount-VHD -Path $ResolvedPath }
+            Remove-Item -LiteralPath $ResolvedPath -Force
             Write-Verbose "Cleanup completed"
         }
         catch {

@@ -109,7 +109,10 @@ try {
 
     $zipPath = Join-Path $tempDir $assetName
     Write-Log "Downloading $($asset.browser_download_url)"
-    Invoke-WebRequest -Headers $headers -Uri $asset.browser_download_url -OutFile $zipPath
+    Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath
+    if ("sha256:$((Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash)" -ne $asset.digest) {
+        throw "Missing or mismatched release digest for $assetName"
+    }
 
     Write-Log 'Extracting archive'
     Expand-Archive -Path $zipPath -DestinationPath $tempDir -Force

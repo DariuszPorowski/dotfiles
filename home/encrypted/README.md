@@ -1,21 +1,13 @@
-# AGE
+# Editing encrypted profiles
 
-## Encrypt
+On a trusted personal workstation, run this from the repository root with the
+personal chezmoi configuration initialized:
 
-```powershell
-age --encrypt --armor --identity "${env:USERPROFILE}\personal.age" --output src\encrypted\azdo_microsoft.yaml.age src\encrypted\azdo_microsoft.yaml
+```sh
+chezmoi edit-encrypted home/encrypted/azdo_microsoft.yaml.age
 ```
 
-```shell
-age --encrypt --armor --identity "~/personal.age" --output src/encrypted/azdo_microsoft.yaml.age src/encrypted/azdo_microsoft.yaml
-```
-
-## Decrypt
-
-```powershell
-age --decrypt --identity "${env:USERPROFILE}\personal.age" src\encrypted\azdo_microsoft.yaml.age  > src\encrypted\azdo_microsoft.yaml
-```
-
-```shell
-age --decrypt --identity "~/personal.age" src/encrypted/azdo_microsoft.yaml.age  > src/encrypted/azdo_microsoft.yaml
-```
+The command opens a temporary decrypted copy and re-encrypts it when the
+editor exits. Use an editor that waits until you finish, and avoid persistent
+editor backups, swap files or cloud sync for decrypted data. Do not redirect
+plaintext into the working tree or add `personal.age` to Git.

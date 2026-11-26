@@ -1,0 +1,11 @@
+{{- if and (not .machine.ephemeral) (eq (get .machine "profile") "work") -}}
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="Microsoft.PackageFeedProxy" value="{{ .packageFeeds.nuget }}" protocolVersion="3" />
+  </packageSources>
+  <disabledPackageSources>
+    <add key="nuget.org" value="true" />
+  </disabledPackageSources>
+</configuration>
+{{ end -}}

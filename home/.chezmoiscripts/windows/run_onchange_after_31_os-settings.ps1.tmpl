@@ -1,0 +1,6 @@
+{{- if and .machine.windows (not .machine.ephemeral) (ne (includeTemplate "is-ci.tmpl" .) "true") -}}
+$ErrorActionPreference = 'Stop'
+# hash: {{ include (joinPath .chezmoi.sourceDir "dot_configurations/os-settings.winget") | sha256sum }}
+$dir = Join-Path $HOME '.configurations'
+& (Join-Path $dir 'Set-WinGetConfiguration.ps1') -YamlConfigFilePath (Join-Path $dir 'os-settings.winget') -RequireStandardUser -TestNativeDsc
+{{ end -}}

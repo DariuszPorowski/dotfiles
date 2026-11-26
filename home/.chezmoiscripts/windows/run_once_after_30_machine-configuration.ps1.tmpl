@@ -1,19 +1,10 @@
+{{- if and (not .machine.ephemeral) (ne (includeTemplate "is-ci.tmpl" .) "true") -}}
+$ErrorActionPreference = 'Stop'
 Write-Host 'APPLYING WINGET CONFIGURATION (MACHINE)'
 
-$scriptPath = Join-Path "$env:USERPROFILE" '.configurations' 'Set-WinGetConfiguration.ps1'
+$scriptPath = Join-Path $HOME '.configurations\Set-WinGetConfiguration.ps1'
 
-# hash: {{ include (joinPath .chezmoi.sourceDir "dot_configurations/machine-pkgs.winget") | sha256sum }}
-$config = Join-Path "$env:USERPROFILE" '.configurations' 'machine-pkgs.winget'
-& $scriptPath -Sudo -YamlConfigFilePath "$config" -ValidateFirst
-
-Write-Host 'CONFIGURING PACKAGES (MACHINE)...'
-
-if (Get-Command "fnm" -ErrorAction SilentlyContinue) {
-    Write-Host 'Installing Node.js...'
-    fnm install --lts
-}
-
-if (Get-Command "uv" -ErrorAction SilentlyContinue) {
-    Write-Host 'Installing Python...'
-    uv python install --default "3.14" --preview-features python-install-default
-}
+# hash: {{ includeTemplate "dot_configurations/machine-pkgs.winget.tmpl" . | sha256sum }}
+$config = Join-Path $HOME '.configurations\machine-pkgs.winget'
+& $scriptPath -RequireStandardUser -YamlConfigFilePath "$config" -ValidateFirst{{ if eq (get .machine "profile") "work" }} -WorkCatalogUri '{{ .packageFeeds.powershellGet | replace "'" "''" }}'{{ end }}
+{{ end -}}

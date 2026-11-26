@@ -2,7 +2,27 @@
 # Init
 ############################################
 
+if ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT) {
+    # VS Code can outlive a WinGet install. Keep its process PATH first and add missing user entries.
+    & {
+        $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+        if (-not $userPath) { return }
+        $entries = @($env:Path -split ';' | Where-Object { $_ })
+        foreach ($dir in ([Environment]::ExpandEnvironmentVariables($userPath) -split ';')) {
+            if (-not [string]::IsNullOrWhiteSpace($dir) -and $dir -notin $entries) {
+                $entries += $dir
+            }
+        }
+        $env:Path = $entries -join ';'
+    }
+}
+
 $psType = 'pwsh'
+{{- if and (not .machine.windows) (not .machine.ephemeral) (eq (get .machine "profile") "work") }}
+if (-not (Test-Path Env:COREPACK_NPM_REGISTRY)) {
+    $env:COREPACK_NPM_REGISTRY = '{{ trimSuffix "/" .packageFeeds.node }}'
+}
+{{- end }}
 if ($PSVersionTable.PSEdition -eq 'Desktop') {
     $psType = 'powershell'
 }
@@ -13,9 +33,12 @@ if ($PSVersionTable.PSEdition -eq 'Desktop') {
 
 $modules = @(
     "Terminal-Icons",
-    "PSReadLine",
-    "Microsoft.WinGet.CommandNotFound"
+    "PSReadLine"
 )
+if ($PSVersionTable.PSVersion -ge [version]'7.4' -and $IsWindows -and
+    (Get-Command winget.exe -CommandType Application -ErrorAction SilentlyContinue)) {
+    $modules += "Microsoft.WinGet.CommandNotFound"
+}
 
 foreach ($module in $modules) {
     if (Get-Module -ListAvailable -Name $module) {
@@ -58,7 +81,7 @@ function printenv() {
 ############################################
 
 function myip {
-    curl ifconfig.me
+    Invoke-RestMethod -Uri 'https://ifconfig.me/ip'
 }
 
 ############################################
@@ -69,10 +92,17 @@ function myip {
 if (Get-Command aliae -ErrorAction SilentlyContinue) {
     aliae init "$psType" | Invoke-Expression
 }
+if ($podman = Get-Command podman -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1) {
+    Set-Alias -Name docker -Value $podman.Source
+    function docker-compose {
+        if ($MyInvocation.ExpectingInput) { $input | docker compose @args }
+        else { docker compose @args }
+    }
+}
 
 # Initialize Oh-My-Posh if installed
 if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
-    $poshConfigPath = Join-Path "$env:USERPROFILE" '.oh-my-posh.json'
+    $poshConfigPath = Join-Path $HOME '.oh-my-posh.json'
     if (Test-Path $poshConfigPath) {
         oh-my-posh init "$psType" --config $poshConfigPath | Invoke-Expression
     }
@@ -101,10 +131,13 @@ if (Get-Command chezmoi -ErrorAction SilentlyContinue) {
 if (Get-Command uv -ErrorAction SilentlyContinue) {
     uv generate-shell-completion powershell | Out-String | Invoke-Expression
 
-    $uvPython = $(uv python find)
-    if ($uvPython) {
+    $uvPython = uv python find --no-python-downloads 2>$null
+    if ($LASTEXITCODE -eq 0 -and $uvPython) {
         $uvPythonDir = Split-Path $uvPython
-        $env:PATH = "$uvPythonDir;" + $env:PATH
+        $separator = [IO.Path]::PathSeparator
+        if ($uvPythonDir -notin ($env:PATH -split [regex]::Escape($separator))) {
+            $env:PATH = "$uvPythonDir$separator$env:PATH"
+        }
     }
 }
 

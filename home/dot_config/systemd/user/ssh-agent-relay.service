@@ -1,10 +1,12 @@
 [Unit]
 Description=1Password SSH Agent Relay
-After=network.target
 
 [Service]
-ExecStartPre=/bin/rm -f %h/.ssh/agent.sock
-ExecStart=%h/.local/bin/1p-ssh-agent-relay.sh
+RuntimeDirectory=dotfiles-ssh
+RuntimeDirectoryMode=0700
+UMask=0077
+Environment="PATH=%h/.local/bin:/usr/bin:/bin"
+ExecStart=/usr/bin/socat "UNIX-LISTEN:%t/dotfiles-ssh/agent.sock,fork,mode=0600" "EXEC:npiperelay -ei -s //./pipe/openssh-ssh-agent,nofork"
 Restart=on-failure
 RestartSec=10
 TimeoutStartSec=10

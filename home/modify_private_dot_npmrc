@@ -1,0 +1,2 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- includeTemplate "node-registry.tmpl" (dict "root" . "format" "npm") -}}

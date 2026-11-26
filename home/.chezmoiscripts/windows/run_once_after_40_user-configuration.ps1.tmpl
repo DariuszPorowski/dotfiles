@@ -1,7 +1,25 @@
+{{- if and (not .machine.ephemeral) (ne (includeTemplate "is-ci.tmpl" .) "true") -}}
+$ErrorActionPreference = 'Stop'
 Write-Host 'APPLYING WINGET CONFIGURATION (USER)'
 
-$scriptPath = Join-Path "$env:USERPROFILE" '.configurations' 'Set-WinGetConfiguration.ps1'
+$scriptPath = Join-Path $HOME '.configurations\Set-WinGetConfiguration.ps1'
 
-# hash: {{ include (joinPath .chezmoi.sourceDir "dot_configurations/user-pkgs.winget") | sha256sum }}
-$config = Join-Path "$env:USERPROFILE" '.configurations' 'user-pkgs.winget'
-& $scriptPath -Sudo -YamlConfigFilePath "$config" -ValidateFirst
+# hash: {{ includeTemplate "dot_configurations/user-pkgs.winget.tmpl" . | sha256sum }}
+$config = Join-Path $HOME '.configurations\user-pkgs.winget'
+& $scriptPath -RequireStandardUser -YamlConfigFilePath "$config" -ValidateFirst{{ if eq (get .machine "profile") "work" }} -WorkCatalogUri '{{ .packageFeeds.powershellGet | replace "'" "''" }}'{{ end }}
+
+Write-Host 'Configuring Python 3.14 for the current user...'
+# WinGet may just have installed uv; retain the inherited PATH ahead of newly registered entries.
+$uv = Get-Command uv -CommandType Application -ErrorAction SilentlyContinue
+if (-not $uv) {
+    foreach ($scope in 'Machine', 'User') {
+        $path = [Environment]::GetEnvironmentVariable('Path', $scope)
+        if ($path) { $env:Path += ";$path" }
+    }
+    $uv = Get-Command uv -CommandType Application -ErrorAction Stop
+}
+& $uv.Source python install --default '3.14' --preview-features python-install-default
+if ($LASTEXITCODE -ne 0) { throw "uv python install failed: $LASTEXITCODE" }
+& $uv.Source python update-shell
+if ($LASTEXITCODE -ne 0) { throw "uv python update-shell failed: $LASTEXITCODE" }
+{{ end -}}

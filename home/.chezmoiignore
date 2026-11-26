@@ -1,35 +1,66 @@
 README.md
 *.age
 
-src/
-src/*
 src/**
-docs/
-docs/*
 docs/**
-encrypted/
-encrypted/*
 encrypted/**
-secrets/
-secrets/*
 secrets/**
 
 {{- if not .machine.wsl }}
+.local/bin/npiperelay-symlink.sh
 .local/bin/1p-ssh-agent-relay.sh
 .local/bin/ssh-relay.sh
-.local/bin/npiperelay-symlink.sh
-.config/systemd/
 .config/systemd/**
 {{- end }}
 
 {{- if .machine.ephemeral }}
-# Ephemeral environments (Codespaces/Dev Containers): skip files requiring encryption or local 1Password
+{{- if or (not .machine.linux) .machine.ci .machine.codespace }}
+.gitconfig
+{{- end }}
 .gh_personal.gitconfig
 .gh_microsoft.gitconfig
 .azdo_microsoft.gitconfig
+.ssh/**
+.config/1Password/**
+AppData/Local/1Password/**
+.chezmoiscripts/windows/**
+.npmrc
+.yarnrc
+.yarnrc.yml
+.bunfig.toml
+.config/.bunfig.toml
+.nuget/**
+.config/NuGet/**
+.config/pnpm/**
+.config/pdm/**
+.config/fish/conf.d/dotfiles-corepack.fish
+.config/dotfiles/corepack.sh
+Library/Application Support/pdm/**
+Library/Preferences/pnpm/**
+.config/pip/**
+.config/uv/**
+Library/Application Support/pip/**
 .terraformrc
 AppData/**
-.config/1Password/**
+.wsl/**
+.wslconfig
+.configurations/**
+.azure/**
+autorun.cmd
+{{- end }}
+
+{{- if eq (includeTemplate "is-ci.tmpl" .) "true" }}
+.configurations/os-settings.winget
+.configurations/ssh-agent.winget
+{{- end }}
+
+{{- if not .machine.ephemeral }}
+.config/git/config
+.config/git/dotfiles.inc
+{{- end }}
+
+{{- if not (or (and .machine.ephemeral .machine.linux (not .machine.ci) (not .machine.codespace)) (and .machine.wsl (eq .chezmoi.arch "arm64"))) }}
+.config/git/dotfiles-agent-sign
 {{- end }}
 
 {{ if ne .chezmoi.os "darwin" }}
@@ -38,6 +69,13 @@ AppData/**
 
 {{ if ne .chezmoi.os "linux" }}
 .chezmoiscripts/linux/**
+.config/pdm/**
+{{- end }}
+
+{{ $xdg := env "XDG_CONFIG_HOME" | replace "\\" "/" | trimSuffix "/" }}
+{{ $standardXdg := joinPath .chezmoi.destDir ".config" | replace "\\" "/" }}
+{{ if and (ne .chezmoi.os "linux") (ne $xdg $standardXdg) }}
+.config/pnpm/**
 {{- end }}
 
 {{ if ne .chezmoi.os "windows" }}
@@ -46,12 +84,19 @@ AppData/**
 Documents/**
 .configurations/**
 .wsl/**
+.scripts/vscode/**
 autorun.cmd
 .wslconfig
 {{- end }}
 
-{{ if or (eq .chezmoi.os "windows") (eq .chezmoi.os "darwin") }}
+{{ $macPip := and (eq .chezmoi.os "darwin") (stat (joinPath .chezmoi.destDir "Library/Application Support/pip")) }}
+{{ if or (eq .chezmoi.os "windows") $macPip }}
+.config/pip
 .config/pip/**
+{{- end }}
+{{ if and (eq .chezmoi.os "darwin") (not $macPip) }}
+Library/Application Support/pip
+Library/Application Support/pip/**
 {{- end }}
 
 {{ if eq .chezmoi.os "windows" }}
@@ -59,11 +104,15 @@ autorun.cmd
 {{- end }}
 
 {{ if ne .chezmoi.os "darwin" }}
-Library/Application Support/pip/**
+Library/**
 {{- end }}
 
 {{ if eq .chezmoi.os "windows" }}
 .local/**
+.config/dotfiles/corepack.sh
+.nuget/**
+.config/NuGet/**
+.config/fish/conf.d/dotfiles-corepack.fish
 .bashrc
 .zshrc
 .zprofile

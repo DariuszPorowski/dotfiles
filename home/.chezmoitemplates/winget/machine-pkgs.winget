@@ -1,0 +1,176 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/configuration/configuration.schema.0.2.json
+---
+properties:
+  configurationVersion: 0.2.0
+  # Test WinGetPackage as the signed-in user. An installer can request elevation independently.
+  resources:
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: stable-dsc
+      directives:
+        description: Microsoft Desired State Configuration (stable)
+      settings:
+        source: msstore
+        id: 9NVTPZWRC6KQ
+        useLatest: true
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Microsoft.WindowsTerminal
+      directives:
+        description: Windows Terminal
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Microsoft.WindowsTerminal
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Microsoft.PowerShell
+      directives:
+        description: PowerShell
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Microsoft.PowerShell
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Microsoft.WSL
+      directives:
+        description: Windows Subsystem for Linux
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Microsoft.WSL
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Microsoft.WindowsApp
+      directives:
+        description: Windows App
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Microsoft.WindowsApp
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: RedHat.Podman-Desktop
+      directives:
+        description: Podman Desktop
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: RedHat.Podman-Desktop
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Google.AndroidStudio
+      directives:
+        description: Android Studio
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Google.AndroidStudio
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: albertony.npiperelay
+      directives:
+        description: NPipeRelay
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: albertony.npiperelay
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Git.Git
+      directives:
+        description: Git
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Git.Git
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Git.GCM
+      directives:
+        description: Git Credential Manager
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Git.GCM
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Microsoft.AzureCLI
+      directives:
+        description: Install Azure CLI
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Microsoft.AzureCLI
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Microsoft.NuGet
+      directives:
+        description: NuGet
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Microsoft.NuGet
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Chocolatey.Chocolatey
+      directives:
+        description: Chocolatey
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Chocolatey.Chocolatey
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Chocolatey.ChocolateyGUI
+      directives:
+        description: Chocolatey GUI
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Chocolatey.ChocolateyGUI
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: GnuPG.GnuPG
+      directives:
+        description: GnuPG
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: GnuPG.GnuPG
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: GnuPG.Gpg4win
+      directives:
+        description: Gpg4win
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: GnuPG.Gpg4win
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: FireDaemon.OpenSSL
+      directives:
+        description: OpenSSL
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: FireDaemon.OpenSSL
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: Microsoft.Coreutils
+      directives:
+        description: Core Utils
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: Microsoft.Coreutils
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: PuTTY.PuTTY
+      directives:
+        description: PuTTY
+        allowPrerelease: true
+      settings:
+        source: winget
+        id: PuTTY.PuTTY

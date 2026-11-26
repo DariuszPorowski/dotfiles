@@ -1,0 +1,28 @@
+{{- $body := .root.chezmoi.stdin -}}
+{{- $profile := get .root.machine "profile" -}}
+{{- if or .root.machine.ephemeral (not $profile) -}}
+{{ $body -}}
+{{- else -}}
+{{- $eol := ternary "\r\n" "\n" (contains "\r\n" $body) -}}
+{{- $header := printf "[%s] # dotfiles: work feed" .section -}}
+{{- $line := printf "%s = %q # dotfiles: work feed" .key .url -}}
+{{- $clean := $body | replaceAllRegex (printf `(?m)^%s(?:\r?\n|$)` (regexQuoteMeta $line)) "" -}}
+{{- $clean = $clean | replaceAllRegex (printf `(?m)^%s(?:\r?\n)?\z` (regexQuoteMeta $header)) "" -}}
+{{- if eq $profile "work" -}}
+{{-   $config := fromToml $clean | default dict -}}
+{{-   $section := get $config .section | default dict -}}
+{{-   if not (hasKey $section .key) -}}
+{{-     $pattern := printf `(?m)^([ \t]*\[%s\][ \t]*(?:#[^\r\n]*)?)(\r?\n|$)` .section -}}
+{{-     if regexMatch $pattern $clean -}}
+{{-       $clean = $clean | replaceAllRegex $pattern (printf "${1}%s%s%s" $eol $line $eol) -}}
+{{-     else -}}
+{{-       if and $clean (not (hasSuffix "\n" $clean)) }}{{ $clean = print $clean $eol }}{{ end -}}
+{{-       $clean = printf "%s%s%s%s%s" $clean $header $eol $line $eol -}}
+{{-     end -}}
+{{-     if ne (dig .section .key "" (fromToml $clean)) .url -}}
+{{-       fail "Cannot merge the work feed into this TOML file. Set its registry explicitly." -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{ $clean -}}
+{{- end -}}

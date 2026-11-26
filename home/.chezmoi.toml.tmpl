@@ -1,24 +1,55 @@
-# ~/.config/chezmoi/config.toml
+{{- $linux := eq .chezmoi.os "linux" -}}
+{{- $on := list "1" "true" "yes" -}}
+{{- $codespace := has (env "CODESPACES" | lower) $on -}}
+{{- $ci := eq (includeTemplate "is-ci.tmpl" .) "true" -}}
+{{- $container := or (has (env "REMOTE_CONTAINERS" | lower) $on) (ne (env "REMOTE_CONTAINERS_IPC") "") (and $linux (or (eq .chezmoi.username "vscode") (stat "/.dockerenv") (stat "/run/.containerenv"))) -}}
+{{- $ephemeral := or $codespace $ci $container -}}
+{{- /* Preserve pre-auto configs: their saved profile may have been chosen explicitly. */ -}}
+{{- $mode := env "DOTFILES_PROFILE" | default (dig "machine" "profile_mode" (dig "machine" "profile" "auto" .) .) -}}
+{{- if not (has $mode (list "auto" "work" "personal")) -}}
+{{-   fail "DOTFILES_PROFILE must be auto, work or personal." -}}
+{{- end -}}
+{{- $profile := ternary "personal" $mode (eq $mode "auto") -}}
+{{- if and (eq $mode "auto") (eq .chezmoi.os "windows") (not $ephemeral) -}}
+{{-   $shell := or (lookPath "pwsh") (lookPath "powershell.exe") -}}
+{{-   $joined := "" -}}
+{{-   if $shell -}}
+{{-     $joined = output $shell "-NoLogo" "-NoProfile" "-NonInteractive" "-Command" (includeTemplate "windows-entra-joined.ps1" .) | trim -}}
+{{-   end -}}
+{{-   if eq $joined "YES" -}}
+{{-     $profile = "work" -}}
+{{-   else if ne $joined "NO" -}}
+{{-     warnf "Could not determine the Windows Entra device join state; using personal feeds. Set DOTFILES_PROFILE to override." -}}
+{{-   end -}}
+{{- end -}}
+{{- $wsl := and $linux (not $ephemeral) (or (ne (env "WSL_DISTRO_NAME") "") (contains "microsoft" (lower .chezmoi.kernel.osrelease))) -}}
+{{- $windowsProfile := "" -}}
+{{- if $wsl -}}
+{{-   $windowsProfile = env "DOTFILES_WINDOWS_PROFILE" -}}
+{{-   if not $windowsProfile -}}
+{{-     if not (and (stat "/mnt/c/Windows/System32/cmd.exe") (lookPath "wslpath")) -}}
+{{-       fail "Cannot resolve the Windows profile. Set DOTFILES_WINDOWS_PROFILE to its absolute WSL path and rerun chezmoi init." -}}
+{{-     end -}}
+{{-     $hostPath := output "sh" "-c" `cd /mnt/c && exec /mnt/c/Windows/System32/cmd.exe /d /c 'echo %USERPROFILE%'` | trim -}}
+{{-     $windowsProfile = output "wslpath" "-u" $hostPath | trim -}}
+{{-   end -}}
+{{-   if not (regexMatch `^/[^\r\n]+$` $windowsProfile) -}}
+{{-     fail "DOTFILES_WINDOWS_PROFILE must be an absolute WSL path, for example /mnt/c/Users/WinUser." -}}
+{{-   end -}}
+{{- end -}}
+# .chezmoiroot points inside the checkout; sourceDir must point to the checkout itself.
+sourceDir = {{ .chezmoi.workingTree | quote }}
 
-{{/* GitHub Codespaces clone the repository to this directory */}}
-{{- if (env "CODESPACES") }}
-sourceDir = "/workspaces/.codespaces/.persistedshare/dotfiles"
-{{- end }}
-
-{{/* Ephemeral check - must be inline here since machine.toml.tmpl is included after */}}
-{{- $is_ephemeral := or (env "CODESPACES" | not | not) (env "REMOTE_CONTAINERS" | not | not) (env "CI" | not | not) (eq .chezmoi.username "vscode") -}}
-{{- if not $is_ephemeral }}
+{{- if not $ephemeral }}
 encryption = "age"
+useBuiltinAge = true
 [age]
-  identity = "~/personal.age"
+  identity = {{ joinPath .chezmoi.destDir "personal.age" | quote }}
   recipient = "age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p"
 {{- end }}
 
-progress = true
-verbose = true
-
-{{- includeTemplate "cpu.toml.tmpl" . }}
-{{- includeTemplate "machine.toml.tmpl" . }}
+[add]
+  secrets = "error"
 
 [data]
   username = {{ .chezmoi.username | splitList `\` | last | quote }}
@@ -27,17 +58,32 @@ verbose = true
   username = {{ env "GITHUB_USER" | default "DariuszPorowski" | quote }}
   workspace = {{ env "GITHUB_WORKSPACE" | not | not }}
 
-[onepassword]
-  cache = true
+[data.machine]
+  profile_mode = {{ $mode | quote }}
+  profile = {{ $profile | quote }}
+  os = {{ .chezmoi.os | quote }}
+  mac = {{ eq .chezmoi.os "darwin" }}
+  linux = {{ $linux }}
+  windows = {{ eq .chezmoi.os "windows" }}
+  wsl = {{ $wsl }}
+{{- if $wsl }}
+  windows_profile = {{ trimSuffix "/" $windowsProfile | quote }}
+{{- end }}
+  codespace = {{ $codespace }}
+  dev_container = {{ not (not $container) }}
+  ci = {{ $ci }}
+  ephemeral = {{ not (not $ephemeral) }}
 
-{{ if lookPath "code" }}
+{{ if and (not $ephemeral) (lookPath "code") }}
 [edit]
   command = "code"
   args = ["--wait"]
 
+{{- if has (env "DOTFILES_VSCODE_DIFF" | lower) $on }}
 [diff]
   command = "code"
   args = ["--wait", "--diff"]
+{{- end }}
 
 [merge]
   command = "code"
@@ -47,8 +93,8 @@ verbose = true
 [update]
   recurseSubmodules = true
 
-{{ if lookPath "pwsh" }}
+{{ if eq .chezmoi.os "windows" }}
 [interpreters.ps1]
-  command = "pwsh"
-  args = ["-NoLogo", "-NoProfile"]
+  command = {{ if lookPath "pwsh" }}"pwsh"{{ else }}"powershell"{{ end }}
+  args = ["-NoLogo", "-NoProfile", "-File"]
 {{- end }}

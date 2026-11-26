@@ -1,0 +1,16 @@
+{{- $profile := get .machine "profile" -}}
+{{- if and $profile (not .machine.ephemeral) -}}
+$ErrorActionPreference = 'Stop'
+$name = 'COREPACK_NPM_REGISTRY'
+$registry = '{{ trimSuffix "/" .packageFeeds.node }}'
+$current = [Environment]::GetEnvironmentVariable($name, 'User')
+{{- if eq $profile "work" }}
+if (-not $current -and -not [Environment]::GetEnvironmentVariable($name, 'Machine')) {
+    [Environment]::SetEnvironmentVariable($name, $registry, 'User')
+}
+{{- else }}
+if ($current -eq $registry) {
+    [Environment]::SetEnvironmentVariable($name, [NullString]::Value, 'User')
+}
+{{- end }}
+{{ end -}}

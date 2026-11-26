@@ -1,21 +1,28 @@
-# Self-elevate the script if required
+{{- if .pkgs.windows.winget.machine -}}
+$ErrorActionPreference = 'Stop'
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     $currentProcess = Get-Process -Id $PID
-    $argumentList = "-File `"$($MyInvocation.MyCommand.Path)`" $($MyInvocation.UnboundArguments)"
-    Start-Process -FilePath $currentProcess.Path -Verb RunAs -ArgumentList $argumentList -Wait
-    Exit
+    $argumentList = "-NoProfile -File `"$PSCommandPath`""
+    $child = Start-Process -FilePath $currentProcess.Path -Verb RunAs -ArgumentList $argumentList -Wait -PassThru
+    exit $child.ExitCode
 }
 
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
-if (-not (Get-Command "winget" -ErrorAction SilentlyContinue)) {
-    Write-Error "WinGet hasn't been installed!"
-    exit
+# The MSI already publishes this directory on the machine PATH. Never link a user executable here.
+$podmanDir = Join-Path ([Environment]::GetFolderPath('ProgramFiles')) 'Podman'
+$machinePodman = Join-Path $podmanDir 'podman.exe'
+if ((Test-Path -LiteralPath $machinePodman -PathType Leaf) -and
+    -not (Get-Command docker -CommandType Application -ErrorAction SilentlyContinue)) {
+    $dockerLink = Join-Path $podmanDir 'docker.exe'
+    if (-not (Test-Path -LiteralPath $dockerLink)) {
+        New-Item -ItemType SymbolicLink -Path $dockerLink -Target $machinePodman | Out-Null
+    }
 }
 
-# winget settings --enable InstallerHashOverride
-
-{{- if .pkgs.windows.winget -}}
+if (-not (Get-Command "winget" -ErrorAction SilentlyContinue)) {
+    throw "WinGet hasn't been installed!"
+}
 
 Write-Host 'INSTALLING WINGET PACKAGES (MACHINE)...'
 
@@ -26,11 +33,37 @@ $machinePackages = @(
 )
 
 foreach ($pkg in $machinePackages) {
+    $scopeArgs = @('--scope', 'machine')
     Write-Host "Installing machine-scope package: $pkg"
-    winget install --id "$pkg" --exact --accept-source-agreements --accept-package-agreements --disable-interactivity --scope machine
+    winget install --id "$pkg" --exact --source winget --silent --accept-source-agreements --accept-package-agreements --disable-interactivity @scopeArgs
+    # WinGet also returns APPINSTALLER_CLI_ERROR_UPDATE_NOT_APPLICABLE when current.
+    if ($LASTEXITCODE -notin 0, -1978335189) { throw "WinGet install failed for ${pkg}: $LASTEXITCODE" }
 }
 
-{{- end }}
+{{ if has "Schniz.fnm" .pkgs.windows.winget.machine -}}
+# Publish a machine default without redirecting anyone's personal fnm store.
+$programFiles = [Environment]::GetFolderPath('ProgramFiles')
+$fnm = Join-Path $programFiles 'WinGet\Links\fnm.exe'
+if (-not (Test-Path -LiteralPath $fnm -PathType Leaf)) {
+    throw "Machine-scope Schniz.fnm is missing at $fnm. Check the WinGet machine installation before retrying."
+}
+$env:FNM_DIR = Join-Path $programFiles 'fnm'
+$env:FNM_NODE_DIST_MIRROR = 'https://nodejs.org/dist'
+$env:FNM_COREPACK_ENABLED = 'false'
+& $fnm install --lts
+if ($LASTEXITCODE -ne 0) { throw "fnm install --lts failed: $LASTEXITCODE" }
+& $fnm default lts-latest
+if ($LASTEXITCODE -ne 0) { throw "fnm default lts-latest failed: $LASTEXITCODE" }
 
-Write-Host 'UPGRADING WINGET PACKAGES (MACHINE)...'
-winget upgrade --all --accept-package-agreements --accept-source-agreements --disable-interactivity --scope machine
+$nodeBin = Join-Path $env:FNM_DIR 'aliases\default'
+if (-not (Test-Path -LiteralPath (Join-Path $nodeBin 'node.exe') -PathType Leaf)) {
+    throw "The shared fnm default does not contain node.exe: $nodeBin"
+}
+# Preserve expandable entries such as %SystemRoot% and the original registry value type.
+$environment = Get-Item -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+$machinePath = $environment.GetValue('Path', '', 'DoNotExpandEnvironmentNames')
+if (($machinePath -split ';') -notcontains $nodeBin) {
+    New-ItemProperty -LiteralPath $environment.PSPath -Name Path -Value "$nodeBin;$machinePath" -PropertyType $environment.GetValueKind('Path') -Force | Out-Null
+}
+{{- end }}
+{{- end }}

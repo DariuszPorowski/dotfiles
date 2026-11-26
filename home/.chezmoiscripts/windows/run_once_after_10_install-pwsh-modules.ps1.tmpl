@@ -1,24 +1,66 @@
-{{- if .pkgs.windows.psGallery -}}
+{{- if and .pkgs.windows.psGallery (not .machine.ephemeral) (ne (includeTemplate "is-ci.tmpl" .) "true") -}}
 
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
-# Self-elevate the script if required
+$ErrorActionPreference = 'Stop'
+$requested = @(
+{{- range .pkgs.windows.psGallery }}
+  '{{ . | replace "'" "''" }}'
+{{- end }}
+)
+# Save-Module copies and bundled modules count; current-user copies do not satisfy AllUsers.
+$programFiles = [Environment]::GetFolderPath('ProgramFiles') + '\'
+$available = Get-Module -ListAvailable -Name $requested |
+  Where-Object { $_.ModuleBase.StartsWith($programFiles, [StringComparison]::OrdinalIgnoreCase) } |
+  Select-Object -ExpandProperty Name
+$missing = @($requested | Where-Object { $_ -notin $available })
+if (-not $missing.Count) { return }
+
+$installer = Get-Command 'PowerShellGet\Install-Module' -ErrorAction SilentlyContinue
+if (-not $installer -or -not $installer.Parameters.ContainsKey('AcceptLicense')) {
+  throw 'This setup requires Install-Module with -AcceptLicense. Install PowerShell 7 (winget install --id Microsoft.PowerShell --exact), open a new shell, then run chezmoi init --apply.'
+}
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
   $currentProcess = Get-Process -Id $PID
-  $argumentList = "-File `"$($MyInvocation.MyCommand.Path)`" $($MyInvocation.UnboundArguments)"
-  Start-Process -FilePath $currentProcess.Path -Verb RunAs -ArgumentList $argumentList -Wait
-  Exit
+  $child = Start-Process -FilePath $currentProcess.Path -Verb RunAs -ArgumentList "-NoProfile -File `"$PSCommandPath`"" -Wait -PassThru
+  exit $child.ExitCode
 }
 
-Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-
 Import-Module PowerShellGet
+$repositories = @(Get-PSRepository)
+{{ if eq (get .machine "profile") "work" -}}
+$repository = 'azure-powershell'
+$gallery = $repositories | Where-Object Name -eq $repository
+if (-not $gallery) {
+  throw "PowerShellGet repository '$repository' is missing for the installing account. Sync Intune policy for that account and retry; public PSGallery will not be used."
+}
+$expectedSource = '{{ .packageFeeds.powershellGet | replace "'" "''" }}'
+if (([string]$gallery.SourceLocation).TrimEnd('/') -cne $expectedSource -or $gallery.InstallationPolicy -ne 'Trusted') {
+  throw "PowerShellGet repository '$repository' must be trusted and use $expectedSource. Check Intune policy; its registration was not changed."
+}
+{{ else -}}
+$repository = 'PSGallery'
+if ($repositories.Name -contains 'azure-powershell') {
+  throw "The managed work repository is present but the dotfiles profile is not 'work'. On a corporate workstation, set DOTFILES_PROFILE=work and run chezmoi init; no public repository was restored or used."
+}
+$gallery = $repositories | Where-Object Name -eq $repository
+if (-not $gallery) {
+  # The provider supplies the built-in URL. PowerShellGet 2.x's -Default wrapper
+  # also calls "nuget sources add" with an empty -source when nuget.exe is on PATH.
+  Register-PackageSource -ProviderName PowerShellGet -Name $repository -Trusted | Out-Null
+  $gallery = Get-PSRepository -Name $repository -ErrorAction Stop
+}
+if ([string]::IsNullOrWhiteSpace($gallery.SourceLocation)) {
+  throw 'PSGallery has no source URL. Check Get-PSRepository -Name PSGallery before retrying.'
+}
+if ($gallery.InstallationPolicy -ne 'Trusted') {
+  Set-PSRepository -Name $repository -InstallationPolicy Trusted
+}
+{{ end -}}
 
-Write-Host 'INSTALLING PSGALLERY MODULES...'
-
-{{ range $module := .pkgs.windows.psGallery }}
-Write-Host "Installing PSGallery module: {{ $module }}"
-Install-Module -Name '{{ $module }}' -Repository PSGallery -SkipPublisherCheck -AcceptLicense #-Force
-{{- end }}
+foreach ($module in $missing) {
+  Write-Host "Installing $module from $repository..."
+  Install-Module -Name $module -Repository $repository -Scope AllUsers -AcceptLicense -Force
+}
 
 {{- end }}

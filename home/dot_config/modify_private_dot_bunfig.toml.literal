@@ -1,0 +1,2 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- includeTemplate "toml-feed.tmpl" (dict "root" . "section" "install" "key" "registry" "url" .packageFeeds.node) -}}

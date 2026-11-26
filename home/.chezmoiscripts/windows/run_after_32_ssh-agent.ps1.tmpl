@@ -1,0 +1,12 @@
+{{- if and .machine.windows (not .machine.ephemeral) (ne (includeTemplate "is-ci.tmpl" .) "true") -}}
+{{- /* An empty hook is neither displayed nor executed. Recheck live state so a later install or re-enable is still handled. */ -}}
+{{- $manifest := include (joinPath .chezmoi.sourceDir "dot_configurations/ssh-agent.winget") | fromYaml -}}
+{{- $desired := (index $manifest.resources 0).properties -}}
+{{- $shell := or (lookPath "pwsh") (lookPath "powershell.exe") -}}
+{{- $state := output $shell "-NoProfile" "-NonInteractive" "-Command" (includeTemplate "windows-ssh-agent-state.ps1" .) | trim -}}
+{{- if and $state (ne $state (printf "%s/%s" $desired.startType $desired.status)) -}}
+$ErrorActionPreference = 'Stop'
+$dir = Join-Path '{{ .chezmoi.destDir | replace "'" "''" }}' '.configurations'
+& (Join-Path $dir 'Set-WinGetConfiguration.ps1') -YamlConfigFilePath (Join-Path $dir 'ssh-agent.winget') -RequireStandardUser -TestNativeDsc
+{{ end -}}
+{{ end -}}

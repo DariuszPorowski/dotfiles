@@ -1,0 +1,6 @@
+---
+packageFeeds:
+  nuget: https://packagefeedproxy.microsoft.io/nuget/v3/index.json
+  python: https://packagefeedproxy.microsoft.io/pypi/simple/
+  node: https://packagefeedproxy.microsoft.io/npm/
+  powershellGet: https://packagefeedproxy.microsoft.io/powershell/v2

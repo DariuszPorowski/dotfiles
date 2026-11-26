@@ -1,7 +1,11 @@
+{{- if and (not .machine.ephemeral) (ne (includeTemplate "is-ci.tmpl" .) "true") -}}
+$ErrorActionPreference = 'Stop'
 Write-Host 'APPLYING WINGET CONFIGURATION (OS)'
 
-$scriptPath = Join-Path "$env:USERPROFILE" '.configurations' 'Set-WinGetConfiguration.ps1'
+$scriptPath = Join-Path $HOME '.configurations\Set-WinGetConfiguration.ps1'
 
-# hash: {{ include (joinPath .chezmoi.sourceDir "dot_configurations/os.winget") | sha256sum }}
-$config = Join-Path "$env:USERPROFILE" '.configurations' 'os.winget'
-& $scriptPath -Sudo -YamlConfigFilePath "$config" -ValidateFirst
+# hash: {{ includeTemplate "dot_configurations/os.winget.tmpl" . | sha256sum }}
+$config = Join-Path $HOME '.configurations\os.winget'
+# WinGet elevates individual machine resources; keep diagnostics and HKCU settings in this user's session.
+& $scriptPath -YamlConfigFilePath "$config" -ValidateFirst{{ if eq (get .machine "profile") "work" }} -WorkCatalogUri '{{ .packageFeeds.powershellGet | replace "'" "''" }}'{{ end }}
+{{ end -}}

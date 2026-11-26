@@ -1,0 +1,45 @@
+{{- $body := .root.chezmoi.stdin -}}
+{{- $profile := get .root.machine "profile" -}}
+{{- if or .root.machine.ephemeral (not $profile) -}}
+{{ $body -}}
+{{- else -}}
+{{- $url := .root.packageFeeds.node -}}
+{{- $line := printf "registry=%s" $url -}}
+{{- $explicit := `(?mi)^\s*registry\s*=` -}}
+{{- if eq .format "classic" -}}
+{{-   $line = printf "registry %q" $url -}}
+{{-   $explicit = `(?m)^[ \t]*"?registry"?[ \t]+` -}}
+{{- else if eq .format "yaml" -}}
+{{-   $line = printf "%s: %q" .key $url -}}
+{{- end -}}
+{{- $eol := ternary "\r\n" "\n" (contains "\r\n" $body) -}}
+{{- $block := printf "# dotfiles: work registry\n%s\n" $line -}}
+{{- $pattern := regexQuoteMeta $line -}}
+{{- if eq .format "npm" }}{{ $pattern = printf `%s/?` (regexQuoteMeta (trimSuffix "/" $line)) }}{{ end -}}
+{{- $clean := $body | replaceAllRegex (printf `(?m)^# dotfiles: work registry\r?\n%s(?:\r?\n|$)` $pattern) "" -}}
+{{- if eq .format "npm" -}}
+{{- /* Earlier dotfiles wrote this exact unmarked npm line. */ -}}
+{{-   $clean = $clean | replaceAllRegex (printf `(?m)^registry=%s/?(?:\r?\n|$)` (regexQuoteMeta (trimSuffix "/" $url))) "" -}}
+{{- end -}}
+{{- if eq $profile "work" -}}
+{{-   $configured := regexMatch $explicit $clean -}}
+{{-   if eq .format "yaml" -}}
+{{-     $config := fromYaml $clean | default dict -}}
+{{-     $configured = hasKey $config .key -}}
+{{-     if eq .key "registry" -}}
+{{-       range $route := (get $config "registries" | default dict) -}}
+{{-         if has "@" (get $route "scopes" | default list) }}{{ $configured = true }}{{ end -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+{{-   if not $configured -}}
+{{-     $suffix := $block | replace "\n" $eol -}}
+{{-     if and $clean (not (hasSuffix "\n" $clean)) }}{{ $clean = print $clean $eol }}{{ end -}}
+{{-     $clean = print $clean $suffix -}}
+{{-     if and (eq .format "yaml") (ne (get (fromYaml $clean) .key) $url) -}}
+{{-       fail "Cannot merge the work registry into this YAML file. Set its registry explicitly." -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{ $clean -}}
+{{- end -}}

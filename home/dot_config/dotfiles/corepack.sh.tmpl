@@ -1,0 +1,6 @@
+{{- if and (eq (get .machine "profile") "work") (not .machine.ephemeral) -}}
+# shellcheck shell=sh
+if [ -z "${COREPACK_NPM_REGISTRY+x}" ]; then
+  export COREPACK_NPM_REGISTRY='{{ trimSuffix "/" .packageFeeds.node }}'
+fi
+{{ end -}}

@@ -1,4 +1,31 @@
 {
+  "servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${input:CONTEXT7_API_KEY}"
+      }
+    },
+    "workiq": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@microsoft/workiq",
+        "mcp"
+      ]
+    },
+    "davinci-resolve": {
+      "args": [],
+      "command": "C:\\Program Files\\Blackmagic Design\\DaVinci Resolve\\ResolveMCP.exe",
+      "type": "stdio"
+    }
+  },
   "inputs": [
     {
       "type": "promptString",
@@ -6,35 +33,5 @@
       "description": "Context7 API Key",
       "password": true
     }
-  ],
-  "servers": {
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "tools": [
-        "*"
-      ]
-    },
-    "context7": {
-      "type": "http",
-      "url": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "${input:CONTEXT7_API_KEY}"
-      },
-      "tools": [
-        "*"
-      ]
-    },
-    "workiq": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@microsoft/workiq",
-        "mcp"
-      ],
-      "tools": [
-        "*"
-      ]
-    }
-  }
+  ]
 }

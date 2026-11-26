@@ -33,7 +33,6 @@ Positional arguments:
 Environment variables:
   VERSION           Desired version (default: latest)
   INSTALL_DIR       Install directory override
-  GITHUB_TOKEN      GitHub token for API authentication
 
 Examples:
   $0                         # Install latest
@@ -61,85 +60,66 @@ if [[ -z "${INSTALL_DIR}" ]]; then
   INSTALL_DIR="${HOME}/.local/share/fnm"
 fi
 
-# Check dependencies
-command -v curl >/dev/null 2>&1 || die "Missing required dependency: curl"
-
-# Create install directory if it doesn't exist
-if [[ ! -d "${INSTALL_DIR}" ]]; then
-  mkdir -p "${INSTALL_DIR}" || die "Cannot create install directory ${INSTALL_DIR}"
+link_dir="$HOME/.local/bin"
+mkdir -p -- "$INSTALL_DIR" "$link_dir"
+bin="$(CDPATH='' cd -- "$INSTALL_DIR" && pwd -P)/$TOOL_NAME"
+link="$(CDPATH='' cd -- "$link_dir" && pwd -P)/$TOOL_NAME"
+previous=''
+if [[ -L $link ]]; then
+  previous=$(readlink "$link")
+elif [[ -e $link && $link != "$bin" ]]; then
+  die "Not replacing existing file: $link"
 fi
 
-log "Installing ${TOOL_NAME} (${VERSION}) to ${INSTALL_DIR}"
-
-# GitHub API authentication
-if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-  ghAuthHeader=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
-else
-  ghAuthHeader=()
+if [[ $VERSION == latest || ! -x $bin ]] ||
+   ! installed=$("$bin" --version) || [[ $installed != "fnm ${VERSION#v}" ]]; then
+  unset GH_TOKEN GITHUB_TOKEN
+  log "Installing $TOOL_NAME ($VERSION) to $INSTALL_DIR"
+  if ! curl -fsSL --proto '=https' --tlsv1.3 "$INSTALL_SCRIPT_URL" |
+    bash -s -- --skip-shell --install-dir "${bin%/*}" --release "$VERSION"; then
+    die "Installation failed. Check version or network connection."
+  fi
+  installed=$("$bin" --version) || die "Installed binary failed to run: $bin"
+  [[ $VERSION == latest || $installed == "fnm ${VERSION#v}" ]] || die "Expected $VERSION; got $installed"
+fi
+if [[ $link != "$bin" && $previous != "$bin" ]]; then
+  ln -sfn -- "$bin" "$link"
 fi
 
-# Execute remote installation script
-log "Fetching and executing official installation script"
-if ! curl "${ghAuthHeader[@]}" -fsSL --proto '=https' --tlsv1.3 "${INSTALL_SCRIPT_URL}" | bash -s -- --skip-shell --install-dir "${INSTALL_DIR}" --release "${VERSION}"; then
-  die "Installation failed. Check version or network connection."
+# Bash and Zsh source .commonrc. Fish loads conf.d even without a config.fish.
+fish_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fish"
+hook="$fish_dir/conf.d/dotfiles-fnm.fish"
+mkdir -p -- "${hook%/*}"
+if [[ ! -e $hook && ! -L $hook ]]; then
+  cat > "$hook" <<'FISH'
+if status is-interactive; and test -x "$HOME/.local/bin/fnm"
+    fish_add_path --move --path "$HOME/.local/bin"
+    "$HOME/.local/bin/fnm" env --use-on-cd --version-file-strategy=recursive --shell fish | source
+end
+FISH
 fi
 
-log "✓ Successfully installed ${TOOL_NAME} to ${INSTALL_DIR}"
-
-# Run tool version to verify
-"${INSTALL_DIR}/fnm" --version || die "Installed binary failed to run (${INSTALL_DIR}/fnm)"
-
-# Create symlink in ~/.local/bin
-SYMLINK_DIR="${HOME}/.local/bin"
-SYMLINK_PATH="${SYMLINK_DIR}/${TOOL_NAME}"
-
-if [[ ! -d "${SYMLINK_DIR}" ]]; then
-  mkdir -p "${SYMLINK_DIR}" || die "Cannot create symlink directory ${SYMLINK_DIR}"
-fi
-
-if [[ -L "${SYMLINK_PATH}" ]]; then
-  log "Removing existing symlink at ${SYMLINK_PATH}"
-  rm -f "${SYMLINK_PATH}"
-elif [[ -e "${SYMLINK_PATH}" ]]; then
-  die "Cannot create symlink: ${SYMLINK_PATH} already exists and is not a symlink"
-fi
-
-ln -s "${INSTALL_DIR}/${TOOL_NAME}" "${SYMLINK_PATH}" || die "Failed to create symlink ${SYMLINK_PATH}"
-log "✓ Created symlink: ${SYMLINK_PATH} -> ${INSTALL_DIR}/${TOOL_NAME}"
-
-# Function to add environment variables to shell config
-add_to_shell() {
-  local shell_config="$1"
-  local shell_type="$2"
-
-  if [[ -f "${shell_config}" ]]; then
-    # Array of environment variables to add
-    local env_vars=(
-      "export PATH=\$PATH:${INSTALL_DIR}"
-    )
-
-    # Add each variable if not already present
-    for str in "${env_vars[@]}"; do
-      if ! grep -qF "${str}" "${shell_config}"; then
-        echo "${str}" >>"${shell_config}"
+# Remove only complete lines our earlier installers emitted; keep user hooks
+# and even an unterminated last line unchanged.
+migrate_fish() {
+  local config=$1 line eol dir kept='' changed=0
+  [[ -f $config ]] || return 0
+  while :; do
+    if IFS= read -r line; then eol=$'\n'; elif [[ -n $line ]]; then eol=''; else break; fi
+    # shellcheck disable=SC2016 # Match the literal old hook, not its output.
+    case $line in
+      'eval "$(fnm env --use-on-cd --shell fish)"'|'fnm env --use-on-cd --shell fish | source')
+        changed=1; continue ;;
+    esac
+    for dir in "$INSTALL_DIR" "${bin%/*}" "${previous%/*}" "$HOME/.local/share/fnm"; do
+      if [[ -n $dir && ( $line == "export PATH=\$PATH:$dir" || $line == "fish_add_path '$dir'" ) ]]; then
+        changed=1; continue 2
       fi
     done
-
-    # Add fnm env command if not already present
-    if ! grep -q "fnm env" "${shell_config}"; then
-      echo "eval \"\$(fnm env --use-on-cd --shell ${shell_type})\"" >>"${shell_config}"
-    fi
-  fi
+    kept+="$line$eol"
+  done < "$config"
+  if (( changed )); then printf '%s' "$kept" > "$config"; fi
 }
-
-# Configure both bash and zsh if present
-add_to_shell ~/.bashrc bash
-add_to_shell ~/.zshrc zsh
-add_to_shell ~/.config/fish/config.fish fish
-
-# Verify installation
-"${INSTALL_DIR}/${TOOL_NAME}" --version || die "Installed binary failed to run"
-
-# Since this script runs in bash, only evaluate fnm env for bash
-log "Setting up environment for current session"
-eval "$("${INSTALL_DIR}/${TOOL_NAME}" env --use-on-cd --shell bash)"
+migrate_fish "$fish_dir/config.fish"
+if [[ $fish_dir != "$HOME/.config/fish" ]]; then migrate_fish "$HOME/.config/fish/config.fish"; fi
+log "Selected $installed at $bin. Restart your shell to activate it."

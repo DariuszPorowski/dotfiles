@@ -1,0 +1,2 @@
+{{- $on := list "1" "true" "yes" -}}
+{{- or (has (env "CI" | lower) $on) (has (env "GITHUB_ACTIONS" | lower) $on) (has (env "TF_BUILD" | lower) $on) -}}

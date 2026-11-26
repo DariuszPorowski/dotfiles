@@ -1,0 +1,105 @@
+{{- if not .machine.ephemeral -}}
+# Managed workstation settings; individual identities come from the selected profiles.
+
+{{- $windowsProfile := .chezmoi.destDir }}
+{{- if .machine.wsl }}
+{{-   $windowsProfile = get .machine "windows_profile" }}
+{{-   if not $windowsProfile }}{{ fail "Missing Windows profile for WSL. Rerun chezmoi init before applying." }}{{ end }}
+{{- end }}
+[init]
+  defaultBranch = main
+[fetch]
+  prune = true
+  pruneTags = true
+  all = true
+[pull]
+  rebase = true
+[push]
+  autoSetupRemote = true
+  default = current
+[rebase]
+  autoSquash = true
+  autoStash = true
+  updateRefs = true
+  stat = true
+[submodule]
+  recurse = true
+[color]
+  ui = auto
+[core]
+  autoCrlf = input
+  fscache = true
+  symlinks = true
+  ignoreCase = false
+  fsMonitor = false
+  fileMode = true
+{{- if .machine.wsl }}
+  excludesfile = {{ printf "%s/.gitignore" $windowsProfile | quote }}
+  attributesfile = {{ printf "%s/.gitattributes" $windowsProfile | quote }}
+  sshCommand = /mnt/c/Windows/System32/OpenSSH/ssh.exe
+{{- else }}
+  excludesfile = ~/.gitignore
+  attributesfile = ~/.gitattributes
+{{- end }}
+{{- if .machine.windows }}
+  sshCommand = "C:/Windows/System32/OpenSSH/ssh.exe"
+  longpaths = true
+  editor = "code" --wait
+{{- end }}
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+[credential]
+  azreposCredentialType = oauth
+  bitbucketAuthModes = oauth
+  gitHubAuthModes = oauth
+  gitLabAuthModes = browser
+  msauthUseBroker = true
+  helper =
+{{- if .machine.windows }}
+  helper = manager
+{{- else if .machine.wsl }}
+  helper = "/mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe"
+{{- end }}
+[credential "https://dev.azure.com"]
+  useHttpPath = true
+
+[include]
+  path = ~/.gh_personal.gitconfig
+
+{{- $roots := list "~" }}
+{{- if .machine.windows }}
+{{-   $roots = append $roots "X:" }}
+{{- else if .machine.wsl }}
+{{-   $roots = concat $roots (list "/mnt/x" "/mnt/wsl/workspaces" "/workspaces") }}
+{{- end }}
+{{- range $root := $roots }}
+{{- range $profile := list "gh_personal" "gh_microsoft" "azdo_microsoft" }}
+[includeIf "gitdir/i:{{ $root }}/{{ $profile }}/"]
+  path = ~/.{{ $profile }}.gitconfig
+{{- if and $.machine.wsl (ne $root "~") }}
+  path = {{ printf "%s/.%s.gitconfig" $windowsProfile $profile | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+[includeIf "gitdir/i:~/.local/share/chezmoi/"]
+  path = ~/.gh_personal.gitconfig
+{{- if .machine.wsl }}
+[includeIf {{ printf "gitdir/i:%s/.local/share/chezmoi/" $windowsProfile | quote }}]
+  path = {{ printf "%s/.gh_personal.gitconfig" $windowsProfile | quote }}
+{{- end }}
+
+{{- $config := joinPath .chezmoi.sourceDir "encrypted" "azdo_microsoft.yaml.age" | include | decrypt | fromYaml }}
+{{- range $config.organizations }}
+[credential "azrepos:org/{{ .name }}"]
+  azureAuthority = https://login.microsoftonline.com/{{ .tenant_id }}
+  username = {{ $config.email | quote }}
+{{- end }}
+
+[alias]
+  logp = log --graph --pretty=format:\"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset\" --abbrev-commit --date=relative
+{{- else -}}
+# Do not load or decrypt workstation identities in an ephemeral environment.
+{{- end }}

@@ -3,12 +3,19 @@
 # Settings apply across all Linux distros running on WSL 2
 [wsl2]
 guiApplications=true
+memory=32GB
+processors=16
+swap=0
+localhostForwarding=true
 
 # https://learn.microsoft.com/en-us/windows/wsl/networking#dns-tunneling
-dnsTunneling=true
+# NOTE: The Global Secure Access client auto-disables DNS tunneling
+# ("DNS Tunneling is disabled" on boot), so it cannot fix DNS here.
+# Mirrored mode below inherits the Windows host's (working) DNS instead.
+# dnsTunneling=true
 
 # https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking
-# networkingMode=mirrored
+networkingMode=mirrored
 
 # https://github.com/microsoft/WSL/issues/11980#issuecomment-2412350798
 # networkingMode=virtioProxy
@@ -18,5 +25,6 @@ dnsTunneling=true
 
 # Enable experimental features
 [experimental]
+autoMemoryReclaim=gradual
 sparseVhd=true
 bestEffortDnsParsing=true

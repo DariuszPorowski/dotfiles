@@ -1,34 +1,43 @@
-# shellcheck shell=sh
+# shellcheck shell=bash
+[ ! -r "$HOME/.config/dotfiles/corepack.sh" ] || . "$HOME/.config/dotfiles/corepack.sh"
 
-# Helper function to detect current shell
-_detect_shell() {
-  if [ -n "$BASH_VERSION" ]; then
-    echo "bash"
-  elif [ -n "$ZSH_VERSION" ]; then
-    echo "zsh"
-  elif [ -n "$FISH_VERSION" ]; then
-    echo "fish"
-  else
-    basename "${SHELL:-sh}"
+case $- in *i*) ;; *) return ;; esac
+if [ -n "${BASH_VERSION:-}" ]; then
+  _dotfiles_shell=bash
+elif [ -n "${ZSH_VERSION:-}" ]; then
+  _dotfiles_shell=zsh
+else
+  return
+fi
+
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+  _dotfiles_runtime=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+  if [ -S "$_dotfiles_runtime/bus" ]; then
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=$_dotfiles_runtime/bus"
+  elif [ -d "$_dotfiles_runtime" ] && command -v dbus-daemon >/dev/null 2>&1; then
+    if dbus-daemon --session --address="unix:path=$_dotfiles_runtime/bus" --fork; then
+      export DBUS_SESSION_BUS_ADDRESS="unix:path=$_dotfiles_runtime/bus"
+    else
+      printf '%s\n' 'Unable to start the D-Bus session daemon.' >&2
+    fi
   fi
-}
-
-if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && command -v dbus-daemon >/dev/null 2>&1; then
-    uid=$(id -u)
-    dbus-daemon --session --address=unix:path=/run/user/$uid/bus --fork
-    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus"
+  unset _dotfiles_runtime
 fi
 
 {{- if .machine.wsl }}
-CMD_EXE="/mnt/c/Windows/System32/cmd.exe"
-windowsUsername="$($CMD_EXE /c "echo %username%" | tr -d '\r')"
+windowsUsername=$(/mnt/c/Windows/System32/cmd.exe /d /c "echo %username%" 2>/dev/null | tr -d '\r')
 {{- end }}
 
 # Add directories to PATH
+_dotfiles_gopath=${GOPATH:-$HOME/go}
 for dir in \
   "$HOME/bin" \
   "$HOME/local/bin" \
   "$HOME/.local/bin" \
+  "$HOME/.local/go/bin" \
+  "/usr/local/go/bin" \
+  "${GOBIN:-${_dotfiles_gopath%%:*}/bin}" \
+  "$HOME/.local/share/fnm" \
   "$HOME/.cargo/bin" \
 {{- if .machine.wsl }}
   "/mnt/c/Windows/System32/OpenSSH" \
@@ -42,62 +51,68 @@ for dir in \
   esac
 done
 export PATH
+unset dir _dotfiles_gopath
 
-if command -v go &>/dev/null; then
-  export GOBIN="$(go env GOPATH)/bin"
+{{- if .machine.wsl }}
+# Prefer an agent supplied by SSH, the terminal, or a development environment.
+_dotfiles_agent_usable() {
+  [ -n "$1" ] || return 1
+  if ! command -v ssh-add >/dev/null 2>&1; then [ -S "$1" ]; return; fi
+  # ssh-add -l: 0 = identities, 1 = no identities, 2 = cannot contact agent.
+  SSH_AUTH_SOCK="$1" ssh-add -l >/dev/null 2>&1 || [ "$?" -eq 1 ]
+}
+if ! _dotfiles_agent_usable "${SSH_AUTH_SOCK:-}"; then
+  unset SSH_AUTH_SOCK
+  if [ -n "${XDG_RUNTIME_DIR:-}" ] && _dotfiles_agent_usable "$XDG_RUNTIME_DIR/dotfiles-ssh/agent.sock"; then
+    export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/dotfiles-ssh/agent.sock"
+  elif [ -x "$HOME/.local/bin/1p-ssh-agent-relay.sh" ] &&
+       "$HOME/.local/bin/1p-ssh-agent-relay.sh" && _dotfiles_agent_usable "$HOME/.ssh/agent.sock"; then
+    export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
+  fi
 fi
-
-if [ -f "$HOME/.local/bin/1p-ssh-agent-relay.sh" ]; then
-  "$HOME/.local/bin/1p-ssh-agent-relay.sh"
-fi
-
-if [ -f "$HOME/.local/bin/ssh-relay.sh" ]; then
-  . "$HOME/.local/bin/ssh-relay.sh"
-fi
+unset -f _dotfiles_agent_usable
+{{- end }}
 
 if command -v aliae >/dev/null 2>&1; then
-  eval "$(aliae init "$(_detect_shell)")"
+  eval "$(aliae init "$_dotfiles_shell")"
+fi
+if [ -x "$(command -v podman)" ]; then
+  alias docker='podman'
+  alias docker-compose='podman compose'
 fi
 
 if command -v oh-my-posh >/dev/null 2>&1; then
   POSH_CONFIG_PATH="$HOME/.oh-my-posh.json"
   if [ -f "$POSH_CONFIG_PATH" ]; then
-    eval "$(oh-my-posh init "$(_detect_shell)" --config "$POSH_CONFIG_PATH")"
+    eval "$(oh-my-posh init "$_dotfiles_shell" --config "$POSH_CONFIG_PATH")"
   else
-    eval "$(oh-my-posh init "$(_detect_shell)")"
+    eval "$(oh-my-posh init "$_dotfiles_shell")"
   fi
 fi
 
 if command -v mise >/dev/null 2>&1; then
-  _shell="$(_detect_shell)"
-  if [ "$_shell" = "fish" ]; then
-    mise activate fish | source
-  else
-    eval "$(mise activate "$_shell")"
-  fi
-  unset
-
-  eval "$(mise completion "$(_detect_shell)")"
+  eval "$(mise activate "$_dotfiles_shell")"
+  eval "$(mise completion "$_dotfiles_shell")"
 fi
 
 if command -v chezmoi >/dev/null 2>&1; then
-  eval "$(chezmoi completion "$(_detect_shell)")"
+  eval "$(chezmoi completion "$_dotfiles_shell")"
 fi
 
 if command -v uv >/dev/null 2>&1; then
-  eval "$(uv generate-shell-completion "$(_detect_shell)")"
+  eval "$(uv generate-shell-completion "$_dotfiles_shell")"
 fi
 
 if command -v uvx >/dev/null 2>&1; then
-  eval "$(uvx --generate-shell-completion "$(_detect_shell)")"
+  eval "$(uvx --generate-shell-completion "$_dotfiles_shell")"
 fi
 
 if command -v helm >/dev/null 2>&1; then
-  eval "$(helm completion "$(_detect_shell)")"
+  eval "$(helm completion "$_dotfiles_shell")"
 fi
 
 if command -v gh >/dev/null 2>&1; then
-  eval "$(gh completion --shell "$(_detect_shell)")"
+  eval "$(gh completion --shell "$_dotfiles_shell")"
 fi
 
 # enable color support of ls and also add handy aliases
@@ -117,9 +132,33 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-# fnm
-FNM_PATH="${HOME}/.local/share/fnm"
-if [ -d "$FNM_PATH" ]; then
-  export PATH="$FNM_PATH:$PATH"
-  eval "$(fnm env --use-on-cd --version-file-strategy=recursive --shell "$(_detect_shell)")"
+# Select installed runtimes after other PATH initializers, without accumulating
+# duplicate entries when a shell is restarted or this file is sourced again.
+_dotfiles_prefer_bin() {
+  local rest=":$PATH:"
+  rest=${rest//":$1:"/:}
+  rest=${rest#:}
+  rest=${rest%:}
+  PATH="$1${rest:+:$rest}"
+}
+_dotfiles_go="$HOME/.local/go"
+_dotfiles_choice="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/go-root"
+if [ -r "$_dotfiles_choice" ]; then IFS= read -r _dotfiles_go < "$_dotfiles_choice"; fi
+if [ -n "$_dotfiles_go" ] && [ -x "$_dotfiles_go/bin/go" ]; then
+  _dotfiles_prefer_bin "$_dotfiles_go/bin"
 fi
+
+_dotfiles_fnmdir="$HOME/.local/share/fnm"
+if [ -x "$HOME/.local/bin/fnm" ]; then
+  _dotfiles_fnmdir="$HOME/.local/bin"
+  if [ -L "$_dotfiles_fnmdir/fnm" ]; then
+    _dotfiles_link=$(readlink "$_dotfiles_fnmdir/fnm")
+    case $_dotfiles_link in /*/fnm) _dotfiles_fnmdir=${_dotfiles_link%/*} ;; esac
+  fi
+fi
+if [ -x "$_dotfiles_fnmdir/fnm" ]; then _dotfiles_prefer_bin "$_dotfiles_fnmdir"; fi
+if command -v fnm >/dev/null 2>&1; then
+  eval "$(fnm env --use-on-cd --version-file-strategy=recursive --shell "$_dotfiles_shell")"
+fi
+unset -f _dotfiles_prefer_bin
+unset _dotfiles_shell _dotfiles_go _dotfiles_choice _dotfiles_fnmdir _dotfiles_link

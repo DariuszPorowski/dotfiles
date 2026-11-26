@@ -1,0 +1,38 @@
+name: Dotfiles smoke tests
+on: [push, pull_request]
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test in disposable homes
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(tr -d '\r' < home/.chezmoiversion)
+          tmp=$(mktemp -d)
+          trap 'rm -rf "$tmp"' EXIT
+          if [[ $RUNNER_OS == Windows ]]; then
+            asset="chezmoi_${version}_windows_amd64.zip"
+            hash=6b3a0480d0d31cc72a9ef676ae44bb6a5de1222c7bca11db8799a59e9df0e78a
+            curl -fsSL --proto '=https' --proto-redir '=https' -o "$tmp/asset" \
+              "https://github.com/twpayne/chezmoi/releases/download/v$version/$asset"
+            (cd "$tmp" && printf '%s  asset\n' "$hash" | sha256sum -c - && unzip -q asset chezmoi.exe)
+            export PATH="$tmp:$PATH"
+          else
+            asset="chezmoi_${version}_linux_amd64.tar.gz"
+            hash=5f2024119a1860f18f2243b892dd43a79f0fefe2ebef9786ee143f4d5fd69ccb
+            curl -fsSL --proto '=https' --proto-redir '=https' -o "$tmp/asset" \
+              "https://github.com/twpayne/chezmoi/releases/download/v$version/$asset"
+            (cd "$tmp" && printf '%s  asset\n' "$hash" | sha256sum -c - && tar -xzf asset chezmoi)
+            export PATH="$tmp:$PATH"
+          fi
+          python -B -m unittest discover -s tests -p '*.py' -v

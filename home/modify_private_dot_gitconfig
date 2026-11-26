@@ -1,0 +1,7 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $body := .chezmoi.stdin -}}
+{{- /* Keep the include last, even when Dev Containers copied a host-specific signing program. */ -}}
+{{- $block := "# dotfiles: managed Git settings\n[include]\n  path = ~/.config/git/dotfiles-workstation.inc\n  path = ~/.config/git/dotfiles-signing.inc\n" -}}
+{{- $eol := ternary "\r\n" "\n" (contains "\r\n" $body) -}}
+{{- $body = $body | replace $block "" | replace ($block | replace "\n" "\r\n") "" -}}
+{{ $body }}{{ if and $body (not (hasSuffix "\n" $body)) }}{{ $eol }}{{ end }}{{ $block | replace "\n" $eol -}}

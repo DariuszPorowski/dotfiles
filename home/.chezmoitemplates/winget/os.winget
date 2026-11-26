@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/configuration/configuration.schema.0.2.json
+---
+resources:
+  - name: Virtualization features
+    type: Microsoft.Windows/WindowsPowerShell
+    properties:
+      resources:
+        - name: Containers
+          type: PSDesiredStateConfiguration/WindowsOptionalFeature
+          properties:
+            Name: containers
+        - name: Microsoft-Hyper-V
+          type: PSDesiredStateConfiguration/WindowsOptionalFeature
+          properties:
+            Name: Microsoft-Hyper-V
+
+properties:
+  configurationVersion: 0.2.0
+  resources:
+    - resource: Microsoft.Windows.Developer/DeveloperMode
+      directives:
+        description: Enable Developer Mode
+        allowPrerelease: true
+        securityContext: elevated
+      settings:
+        Ensure: Present
+
+    - resource: Microsoft.Windows.Developer/ShowSecondsInClock
+      directives:
+        description: Show seconds in the clock
+        allowPrerelease: true
+        securityContext: elevated
+      settings:
+        Ensure: Present
+
+    - resource: Microsoft.Windows.Developer/EnableLongPathSupport
+      directives:
+        description: Enable long path support
+        allowPrerelease: true
+        securityContext: elevated
+      settings:
+        Ensure: Present
+
+    - resource: Microsoft.Windows.Developer/WindowsExplorer
+      directives:
+        description: Show file extensions
+        allowPrerelease: true
+      settings:
+        FileExtensions: Show
+        HiddenFiles: Hide
+        ItemCheckBoxes: Hide
+
+    - resource: Microsoft.Windows.Developer/Taskbar
+      directives:
+        description: Taskbar configuration
+        allowPrerelease: true
+      settings:
+        Alignment: Middle
+        SearchBoxMode: Hide
+        TaskViewButton: Show
+        WidgetsButton: Hide
+
+    - resource: Microsoft.Windows.Developer/EnableDarkMode
+      directives:
+        description: Enable dark mode
+        allowPrerelease: true
+      settings:
+        Ensure: Present
+        RestartExplorer: true
+
+    # - resource: Microsoft.WinGet.DSC/WinGetPackageManager
+    #   directives:
+    #     description: Ensure WinGet is up to date
+    #     allowPrerelease: true
+    #   settings:
+    #     UseLatest: true
+
+    # Native DSC v3 settings are in os-settings.winget and the optional ssh-agent.winget.

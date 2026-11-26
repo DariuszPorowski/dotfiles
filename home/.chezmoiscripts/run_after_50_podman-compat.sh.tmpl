@@ -1,0 +1,29 @@
+{{- if and (or .machine.linux .machine.mac) (not .machine.ephemeral) (ne (includeTemplate "is-ci.tmpl" .) "true") -}}
+#!/bin/sh
+set -eu
+podman=$(command -v podman) || exit 0
+command -v docker >/dev/null 2>&1 && exit 0
+
+case "$podman" in
+  /usr/bin/podman|/bin/podman)
+    if command -v apt-get >/dev/null 2>&1; then
+      sudo apt-get install --yes --no-remove --no-install-recommends podman-docker
+    elif command -v dnf >/dev/null 2>&1; then
+      sudo dnf install -y podman-docker
+    elif command -v yum >/dev/null 2>&1; then
+      sudo yum install -y podman-docker
+    fi
+    ;;
+  /usr/local/bin/podman|/opt/homebrew/bin/podman|/opt/podman/bin/podman)
+    # The prefix is already on PATH. Don't elevate into a user-managed Homebrew prefix.
+    bin=${podman%/*}
+    if [ ! -e "$bin/docker" ] && [ ! -L "$bin/docker" ]; then
+      if [ -w "$bin" ]; then
+        ln -s podman "$bin/docker"
+      elif [ "$bin" = /opt/podman/bin ]; then
+        sudo ln -s podman "$bin/docker"
+      fi
+    fi
+    ;;
+esac
+{{ end -}}

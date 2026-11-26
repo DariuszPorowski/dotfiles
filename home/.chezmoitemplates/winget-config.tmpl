@@ -1,0 +1,10 @@
+{{- $base := include (joinPath .root.chezmoi.sourceDir ".chezmoitemplates" "winget" .name) -}}
+{{- if and (eq (get .root.machine "profile") "work") (not .root.machine.ephemeral) (ne (includeTemplate "is-ci.tmpl" .root) "true") -}}
+{{- $config := fromYaml $base -}}
+{{- range $unit := $config.properties.resources -}}
+{{-   $_ := set $unit.directives "repository" "azure-powershell" -}}
+{{- end -}}
+{{ toYaml $config -}}
+{{- else -}}
+{{ $base -}}
+{{- end -}}

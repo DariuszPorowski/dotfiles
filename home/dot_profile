@@ -1,4 +1,5 @@
 # shellcheck shell=sh
+[ ! -r "$HOME/.config/dotfiles/corepack.sh" ] || . "$HOME/.config/dotfiles/corepack.sh"
 
 # ~/.profile: executed by the command interpreter for login shells.
 # This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
@@ -11,7 +12,7 @@
 #umask 022
 
 # if running bash
-if [ -n "$BASH_VERSION" ]; then
+if [ -n "${BASH_VERSION:-}" ]; then
   # include .bashrc if it exists
   if [ -f "$HOME/.bashrc" ]; then
     . "$HOME/.bashrc"
@@ -19,11 +20,11 @@ if [ -n "$BASH_VERSION" ]; then
 fi
 
 # set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ]; then
-  PATH="$HOME/bin:$PATH"
-fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ]; then
-  PATH="$HOME/.local/bin:$PATH"
-fi
+for dir in "$HOME/bin" "$HOME/.local/bin"; do
+  case ":$PATH:" in
+    *":$dir:"*) ;;
+    *) [ ! -d "$dir" ] || PATH="$dir:$PATH" ;;
+  esac
+done
+unset dir
+export PATH

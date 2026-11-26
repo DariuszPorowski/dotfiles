@@ -1,0 +1,64 @@
+---
+$schema: https://raw.githubusercontent.com/PowerShell/DSC/main/schemas/2023/08/config/document.json
+metadata:
+  winget:
+    processor:
+      identifier: dscv3
+resources:
+  - name: Delegate console to Windows Terminal
+    type: Microsoft.Windows/Registry
+    properties:
+      keyPath: HKCU\Console\%%Startup
+      valueName: DelegationConsole
+      valueData: { String: '{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}' }
+
+  - name: Delegate terminal to Windows Terminal
+    type: Microsoft.Windows/Registry
+    properties:
+      keyPath: HKCU\Console\%%Startup
+      valueName: DelegationTerminal
+      valueData: { String: '{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}' }
+
+  - name: Configure cmd AutoRun
+    type: Microsoft.Windows/Registry
+    properties:
+      keyPath: HKCU\Software\Microsoft\Command Processor
+      valueName: AutoRun
+      valueData: { String: '%USERPROFILE%\autorun.cmd' }
+
+  - name: Decline Ubuntu Insights at WSL first launch
+    type: Microsoft.Windows/Registry
+    properties:
+      keyPath: HKCU\Software\Canonical\Ubuntu
+      valueName: UbuntuInsightsConsent
+      valueData: { DWord: 0 }
+
+  - name: Enable Windows sudo
+    type: Microsoft.Windows/Registry
+    metadata:
+      winget:
+        securityContext: elevated
+    properties:
+      keyPath: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo
+      valueName: Enabled
+      valueData: { DWord: 3 }
+
+  - name: Disable Recall data analysis
+    type: Microsoft.Windows/Registry
+    metadata:
+      winget:
+        securityContext: elevated
+    properties:
+      keyPath: HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsAI
+      valueName: DisableAIDataAnalysis
+      valueData: { DWord: 1 }
+
+  - name: Disable Recall enablement
+    type: Microsoft.Windows/Registry
+    metadata:
+      winget:
+        securityContext: elevated
+    properties:
+      keyPath: HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsAI
+      valueName: AllowRecallEnablement
+      valueData: { DWord: 0 }

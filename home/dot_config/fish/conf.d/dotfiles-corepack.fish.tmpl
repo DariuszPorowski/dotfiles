@@ -1,0 +1,5 @@
+{{- if and (eq (get .machine "profile") "work") (not .machine.ephemeral) -}}
+if not set -q COREPACK_NPM_REGISTRY
+    set -gx COREPACK_NPM_REGISTRY '{{ trimSuffix "/" .packageFeeds.node }}'
+end
+{{ end -}}

@@ -1,0 +1,111 @@
+#cloud-config
+# yaml-language-server: $schema=https://raw.githubusercontent.com/canonical/cloud-init/26.1/cloudinit/config/schemas/schema-cloud-config-v1.json
+---
+locale: en_US.UTF-8
+fqdn: "__HOSTNAME__"
+prefer_fqdn_over_hostname: true
+manage_etc_hosts: localhost
+
+users:
+  - name: "__USERNAME__"
+    gecos: "__USERNAME__"
+    groups: [users, sudo, netdev, audio]
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: true
+
+disable_root: true
+ssh_pwauth: false
+
+write_files:
+  - path: /etc/wsl.conf
+    append: true
+    content: |
+
+      [user]
+      default = __USERNAME__
+
+      [network]
+      hostname = __HOSTNAME__
+
+  - path: /home/__USERNAME__/.hushlogin
+    owner: __USERNAME__:__USERNAME__
+    defer: true
+
+  - path: /etc/fstab
+    append: true
+    content: |
+      C:	/mnt/c	drvfs	rw,noatime 0 0
+      # D:	/mnt/d	drvfs	rw,noatime 0 0
+      # X:	/mnt/x	drvfs	rw,noatime 0 0
+
+  - path: /etc/apt/keyrings/microsoft-2025.asc
+    source:
+      uri: https://packages.microsoft.com/keys/microsoft-2025.asc
+  - path: /etc/apt/sources.list.d/microsoft-prod.sources
+    content: |
+      Types: deb
+      URIs: https://packages.microsoft.com/ubuntu/26.04/prod
+      Suites: resolute
+      Components: main
+      Signed-By: /etc/apt/keyrings/microsoft-2025.asc AA86F75E427A19DD33346403EE4D7792F748182B
+
+  - path: /etc/apt/keyrings/task.asc
+    source:
+      uri: https://dl.cloudsmith.io/public/task/task/gpg.046FD1186CA342F0.key
+  - path: /etc/apt/sources.list.d/task.sources
+    content: |
+      Types: deb
+      URIs: https://dl.cloudsmith.io/public/task/task/deb/ubuntu
+      Suites: resolute
+      Components: main
+      Signed-By: /etc/apt/keyrings/task.asc D19803B9E1AA18999752F1CA046FD1186CA342F0
+
+apt:
+  sources:
+    git-core:
+      source: ppa:git-core/ppa
+    golang:
+      source: ppa:longsleep/golang-backports
+
+package_update: true
+package_upgrade: true
+# The Windows launcher waits for first boot; do not reboot the guest underneath it.
+package_reboot_if_required: false
+
+packages:
+  - ca-certificates
+  - curl
+  - wget
+  - gpg
+  - gnupg
+  - dos2unix
+  - software-properties-common
+  - apache2-utils
+  - git
+  - jq
+  - make
+  - build-essential
+  - unzip
+  - zip
+  - bind9-dnsutils
+  - direnv
+  - mc
+  - zsh
+  - age
+  - golang-go
+  - net-tools
+  - socat
+
+runcmd:
+  - |
+    failed=0
+    case "$(dpkg --print-architecture)" in
+      amd64) apt-get --yes install powershell || failed=1 ;;
+      arm64) snap install powershell --classic --channel=latest/stable || failed=1 ;;
+      *) echo 'Unsupported guest architecture for PowerShell' >&2; failed=1 ;;
+    esac
+    apt-get --yes install task || failed=1
+    exit "$failed"
+
+final_message: cloud-init done

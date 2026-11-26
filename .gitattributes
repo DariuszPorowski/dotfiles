@@ -1,0 +1,3 @@
+* text=auto eol=lf
+*.reg text eol=crlf
+*.cmd.tmpl text eol=crlf

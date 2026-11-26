@@ -33,7 +33,6 @@ Positional arguments:
 Environment variables:
   VERSION           Desired version (default: latest)
   INSTALL_DIR       Install directory override
-  GITHUB_TOKEN      GitHub token for API authentication
 
 Examples:
   $0                      # Install latest
@@ -76,19 +75,14 @@ fi
 
 log "Installing ${TOOL_NAME} (${VERSION}) to ${INSTALL_DIR}"
 
-# GitHub API authentication
-if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-  ghAuthHeader=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
-else
-  ghAuthHeader=()
-fi
+unset GH_TOKEN GITHUB_TOKEN UV_GITHUB_TOKEN
 
 log "INSTALL_DIR=${INSTALL_DIR}"
 log "VERSION=${VERSION}"
 
 # Execute remote installation script
 log "Fetching and executing official installation script"
-if ! curl "${ghAuthHeader[@]}" -fsSL --proto '=https' --tlsv1.3 "${INSTALL_SCRIPT_URL}" | env UV_INSTALL_DIR="${INSTALL_DIR}" UV_VERSION="${VERSION}" UV_GITHUB_TOKEN="${GITHUB_TOKEN:-}" sh; then
+if ! curl -fsSL --proto '=https' --tlsv1.3 "${INSTALL_SCRIPT_URL}" | env UV_INSTALL_DIR="${INSTALL_DIR}" UV_VERSION="${VERSION}" sh; then
   die "Installation failed. Check version or network connection."
 fi
 

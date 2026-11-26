@@ -1,0 +1,9 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* Git reads this before ~/.gitconfig. Existing settings take precedence. */ -}}
+{{- $include := "[include]\n  path = dotfiles.inc\n" -}}
+{{- $body := trimPrefix "\uFEFF" .chezmoi.stdin -}}
+{{- if hasPrefix "\uFEFF" .chezmoi.stdin }}{{ "\uFEFF" }}{{ end -}}
+{{- if not (hasPrefix $include ($body | replace "\r\n" "\n")) -}}
+{{ $include | replace "\n" (ternary "\r\n" "\n" (contains "\r\n" $body)) }}
+{{- end -}}
+{{ $body -}}

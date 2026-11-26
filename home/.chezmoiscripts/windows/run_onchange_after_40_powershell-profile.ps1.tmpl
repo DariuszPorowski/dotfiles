@@ -1,60 +1,42 @@
 # hash: {{ include (joinPath .chezmoi.sourceDir ".chezmoitemplates/powershell_profile.ps1") | sha256sum }}
+# VS Code seed: {{ include (joinPath .chezmoi.sourceDir "dot_config/powershell/create_Microsoft.VSCode_profile.ps1") | sha256sum }}
 
-# Set strict mode and error preference
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-
-# Define Source
-$source = Join-Path "$env:USERPROFILE" '.config' 'powershell'
-
-# Define Destinations
+$homeDir = [IO.Path]::GetFullPath('{{ .chezmoi.destDir | replace "'" "''" }}')
+$source = Join-Path $homeDir '.config\powershell'
 $destinations = @(
-    Join-Path "$env:USERPROFILE" 'Documents' 'PowerShell'
-    Join-Path "$env:USERPROFILE" 'Documents' 'WindowsPowerShell'
+    (Join-Path $homeDir 'Documents\PowerShell')
+    (Join-Path $homeDir 'Documents\WindowsPowerShell')
 )
-
-if ($env:OneDriveCommercial) {
-    $destinations += Join-Path $env:OneDriveCommercial 'Documents' 'PowerShell'
-    $destinations += Join-Path $env:OneDriveCommercial 'Documents' 'WindowsPowerShell'
-}
-# Ensure Source exists
-if (-not (Test-Path -LiteralPath $source)) {
-    Write-Warning "Source directory not found: $source"
-    exit
-}
-
-foreach ($dest in $destinations) {
-
-    # Create destination directory if it does not exist
-    if (-not (Test-Path -LiteralPath $dest)) {
-        New-Item -Path $dest -ItemType Directory -Force | Out-Null
+$profileDir = [Environment]::GetFolderPath('UserProfile')
+if ($profileDir -and $homeDir -eq [IO.Path]::GetFullPath($profileDir)) {
+    $documents = [Environment]::GetFolderPath('MyDocuments')
+    if ($documents) {
+        $destinations += Join-Path $documents 'PowerShell'
+        $destinations += Join-Path $documents 'WindowsPowerShell'
     }
-
-    # Process .ps1 files (Mandatory updates)
-    Get-ChildItem -LiteralPath $source -Filter "*.ps1" -File | ForEach-Object {
-        $sourceFile = $_
-        $destFilePath = Join-Path $dest $sourceFile.Name
-        $shouldCopy = $false
-
-        if (-not (Test-Path -LiteralPath $destFilePath)) {
-            # Destination file does not exist
-            $shouldCopy = $true
-        }
-        else {
-            $destFileItem = Get-Item -LiteralPath $destFilePath -Force
-
-            # Compare content (Binary comparison equivalent to fc /b)
-            $sourceHash = Get-FileHash -LiteralPath $sourceFile.FullName -Algorithm SHA256
-            $destHash = Get-FileHash -LiteralPath $destFilePath -Algorithm SHA256
-
-            if ($sourceHash.Hash -ne $destHash.Hash) {
-                $shouldCopy = $true
+    if ($env:OneDriveCommercial) {
+        $destinations += Join-Path $env:OneDriveCommercial 'Documents\PowerShell'
+        $destinations += Join-Path $env:OneDriveCommercial 'Documents\WindowsPowerShell'
+    }
+}
+if (-not (Test-Path -LiteralPath $source -PathType Container)) {
+    throw "Source directory not found: $source"
+}
+foreach ($dest in ($destinations | Select-Object -Unique)) {
+    $null = [IO.Directory]::CreateDirectory($dest)
+    Get-ChildItem -LiteralPath $source -Filter '*.ps1' -File | ForEach-Object {
+        $destFilePath = Join-Path $dest $_.Name
+        if ($_.Name -eq 'Microsoft.VSCode_profile.ps1') {
+            # Seed the extension's host-specific profile without overwriting user customizations.
+            if (-not (Test-Path -LiteralPath $destFilePath)) {
+                [IO.File]::Copy($_.FullName, $destFilePath)
             }
-        }
-
-        if ($shouldCopy) {
-            Write-Host "Copying $($sourceFile.Name) to $dest"
-            Copy-Item -LiteralPath $sourceFile.FullName -Destination $destFilePath -Force
+        } elseif (-not (Test-Path -LiteralPath $destFilePath) -or
+            (Get-FileHash -LiteralPath $_.FullName).Hash -ne (Get-FileHash -LiteralPath $destFilePath).Hash) {
+            Write-Host "Copying $($_.Name) to $dest"
+            Copy-Item -LiteralPath $_.FullName -Destination $destFilePath -Force
         }
     }
 }

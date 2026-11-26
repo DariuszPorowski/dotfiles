@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+
+case "${1:-} ${2:-}" in
+  '--default-key ' | '-Y sign')
+    if [ ! -S "${SSH_AUTH_SOCK:-}" ]; then
+      echo 'No forwarded SSH agent. Connect the host 1Password agent before signing.' >&2
+      exit 1
+    fi ;;
+esac
+
+if [ "${1:-}" = --default-key ]; then
+  keys=$(ssh-add -L) || { echo 'No signing key available from the forwarded agent.' >&2; exit 1; }
+  case "$keys" in
+    ''|*'
+'*) echo 'Select the intended 1Password public key with Git user.signingkey; do not guess between accounts.' >&2; exit 1 ;;
+  esac
+  printf '%s\n' "$keys"
+elif [ "${1:-} ${2:-}" = '-Y sign' ]; then
+  # Request agent signing even if a copied Git configuration names a local file.
+  exec ssh-keygen -U "$@"
+else
+  # Verification uses the public allowedSignersFile and does not require the agent.
+  exec ssh-keygen "$@"
+fi

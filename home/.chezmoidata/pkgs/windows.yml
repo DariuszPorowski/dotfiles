@@ -2,7 +2,8 @@
 pkgs:
   windows:
     winget:
-      machine: []
+      machine:
+        - Schniz.fnm
       user:
         # - JanDeDobbeleer.OhMyPosh
         # - JanDeDobbeleer.Aliae
